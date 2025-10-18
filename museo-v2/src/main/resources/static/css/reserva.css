@@ -1,0 +1,36 @@
+.btn-reservar {
+    background-color: #6d4c41;
+    border-color: #6d4c41;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-reservar:hover {
+    background-color: #4e342e;
+    border-color: #4e342e;
+    color: white;
+}
+
+.btn-cancelar {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.resumen-card {
+    background-color: #f8f7f4;
+    border: 1px solid #6d4c41;
+    border-left: 5px solid #6d4c41;
+}
+
+
+.total-display {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #4e342e !important;
+}
+
+.bg-museo-brown {
+    background-color: #6d4c41 !important;
+}

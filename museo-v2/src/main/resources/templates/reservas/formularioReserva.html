@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar Reserva</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="icon" type="image/png" th:href="@{/images/icono.png}">   
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/reserva.css}">
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-museo-brown">
+        <div class="container-fluid">
+            <a class="navbar-brand" th:href="@{/}">Museo Tumbas Reales de Sipan</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/eventos}">Gestión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/salas}">Salas</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row mt-5 justify-content-center">
+
+            <div class="col-md-6 mb-4">
+                <h3 class="color-museo mb-4">
+                    Reservar para: <span th:text="${evento.nombre}"></span>
+                </h3>
+
+                <div class="card p-4 shadow-sm border-0">
+                    <form th:action="@{/reservas/guardar/{id}(id=${evento.id})}" th:object="${reserva}" method="POST">
+
+                        <div class="mb-3">
+                            <label for="nombreCompleto" class="form-label">Nombre Completo</label>
+                            <input type="text" class="form-control" id="nombreCompleto" th:field="*{nombreCompleto}"
+                                required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="dniRuc" class="form-label">DNI / RUC</label>
+                                <input type="text" class="form-control" id="dniRuc" th:field="*{dniRuc}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="telefono" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="telefono" th:field="*{telefono}" required>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="mb-3">
+                            <label for="nEntradas" class="form-label">Nº de Entradas</label>
+                            <input type="number" class="form-control" id="nEntradas" th:field="*{nEntradas}" required
+                                min="1" oninput="calcularTotal()">
+                            <div class="form-text">Costo unitario: <span id="precio-unitario" class="fw-bold"
+                                    th:text="'S/ ' + ${#numbers.formatDecimal(evento.costoEntrada, 0, 'POINT', 2, 'COMMA')}">S/
+                                    15.00</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tipo de Comprobante</label><br>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="boleta" th:field="*{tipoComprobante}"
+                                    value="Boleta" required>
+                                <label class="form-check-label" for="boleta">Boleta</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="factura" th:field="*{tipoComprobante}"
+                                    value="Factura">
+                                <label class="form-check-label" for="factura">Factura</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form-label fw-bold">Método de Pago</label><br>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="efectivo" th:field="*{metodoPago}"
+                                    value="Efectivo" required>
+                                <label class="form-check-label" for="efectivo">Efectivo</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="tarjeta" th:field="*{metodoPago}"
+                                    value="Tarjeta">
+                                <label class="form-check-label" for="tarjeta">Tarjeta</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="billetera" th:field="*{metodoPago}"
+                                    value="Billetera Virtual">
+                                <label class="form-check-label" for="billetera">Billetera Virtual</label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between pt-3">
+                            <button type="submit" class="btn btn-reservar btn-lg shadow-sm w-50 me-2">
+                                Reservar
+                            </button>
+                            <a th:href="@{/}" class="btn btn-cancelar btn-lg w-50">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card resumen-card shadow-lg">
+                    <div class="card-body">
+                        <h4 class="color-museo border-bottom pb-2">Resumen del Evento</h4>
+                        <p><strong>Evento:</strong> <span th:text="${evento.nombre}"></span></p>
+                        <p><strong>Fecha:</strong> <span
+                                th:text="${#temporals.format(evento.fechaInicio, 'dd MMM yyyy')}"></span></p>
+                        <p><strong>Hora:</strong> <span
+                                th:text="${#temporals.format(evento.horaInicio, 'HH:mm')}"></span></p>
+                        <p><strong>Sala:</strong> <span
+                                th:text="${evento.sala != null} ? ${evento.sala.nombre} : 'N/A'"></span></p>
+
+                        <hr class="mt-4 mb-3">
+
+                        <h4 class="color-museo">Cálculo de Compra</h4>
+                        <p><strong>Precio Unitario:</strong> <span id="display-precio"
+                                th:text="'S/ ' + ${#numbers.formatDecimal(evento.costoEntrada, 0, 'POINT', 2, 'COMMA')}">S/
+                                15.00</span></p>
+                        <p><strong>Nº de Entradas:</strong> <span id="display-entradas" th:text="1">1</span></p>
+
+                        <div class="text-center mt-4 p-3 bg-light rounded">
+                            <p class="mb-1 text-uppercase fw-bold">TOTAL A PAGAR:</p>
+                            <span id="total-pagar" class="total-display"
+                                th:text="'S/ ' + ${#numbers.formatDecimal(evento.costoEntrada, 0, 'POINT', 2, 'COMMA')}">S/
+                                15.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const costoUnitario = /*[[${evento.costoEntrada}]]*/ 0.0;
+
+        const displayTotal = document.getElementById('total-pagar');
+        const inputEntradas = document.getElementById('nEntradas');
+        const displayEntradas = document.getElementById('display-entradas');
+
+        const formatter = new Intl.NumberFormat('es-PE', {
+            style: 'currency',
+            currency: 'PEN',
+            minimumFractionDigits: 2,
+        });
+
+        if (!inputEntradas.value) {
+            inputEntradas.value = 1;
+        }
+
+        function calcularTotal() {
+            const numEntradas = parseInt(inputEntradas.value) || 0;
+            const total = numEntradas * costoUnitario;
+
+            displayEntradas.textContent = numEntradas;
+            displayTotal.textContent = formatter.format(total);
+        }
+
+        calcularTotal();
+        inputEntradas.addEventListener('input', calcularTotal);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+</body>
+
+</html>

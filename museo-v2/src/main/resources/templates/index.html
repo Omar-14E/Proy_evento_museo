@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos Culturales del Museo Tumbas Reales</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" th:href="@{/images/icono.png}">    
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-museo-brown">
+        <div class="container-fluid">
+            <a class="navbar-brand" th:href="@{/}">Museo Tumbas Reales de Sipan</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" th:href="@{/}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/eventos}">Gestión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/salas}">Salas</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid hero-section">
+        <div class="hero-content">
+            <h1 class="text-white display-3 fw-bold mb-3" style="letter-spacing: 2px;">
+                Bienvenido
+            </h1>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <h2 class="text-center mb-5 color-museo">Eventos del Mes</h2>
+
+        <div class="row g-4">
+            <div class="col-md-4" th:each="evento : ${eventosDelMes}">
+                <div class="card h-100 shadow-lg">
+                    <img th:if="${evento.sala != null and evento.sala.imagenUrl != null}"
+                        th:src="@{${evento.sala.imagenUrl}}" class="card-img-top" alt="Sala del Evento">
+                    <img th:unless="${evento.sala != null and evento.sala.imagenUrl != null}"
+                        th:src="@{/images/placeholder_sala.png}" class="card-img-top" alt="Sin imagen de sala">
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title color-museo" th:text="${evento.nombre}">Nombre del Evento</h5>
+                        <p class="card-text small">
+                            <span th:text="${#temporals.format(evento.fechaInicio, 'dd MMM yyyy - HH:mm')}">27 Sep 2025
+                                - 18:00</span>
+                            <br>
+                            <small class="text-muted"
+                                th:text="${evento.sala != null} ? 'Sala: ' + ${evento.sala.nombre} : 'Sala no asignada'"></small>
+                        </p>
+                        <div class="mt-auto pt-3">
+                            <a th:href="@{/reservas/crear/{id}(id=${evento.id})}" class="btn btn-brown w-100">Reservar
+                                Entrada</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${eventosDelMes.isEmpty()}" class="alert alert-info text-center mt-5">
+            Actualmente no hay eventos programados para este mes. ¡Vuelve pronto!
+        </div>
+    </div>
+
+    <div class="container mt-5 py-5 border-top">
+        <h2 class="text-center mb-5 color-museo">Próximos Eventos Destacados</h2>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4" th:each="evento : ${eventosProximos}">
+                <div class="card h-100 shadow-sm">
+                    <img th:if="${evento.sala != null and evento.sala.imagenUrl != null}"
+                        th:src="@{${evento.sala.imagenUrl}}" class="card-img-top" alt="Sala del Evento">
+                    <img th:unless="${evento.sala != null and evento.sala.imagenUrl != null}"
+                        th:src="@{/images/placeholder_sala.png}" class="card-img-top" alt="Sin imagen de sala">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title" th:text="${evento.nombre}">Próximo Evento</h5>
+                        <p class="card-text text-muted small">
+                            <span th:text="${#temporals.format(evento.fechaInicio, 'dd MMM yyyy')}">Fecha
+                                próxima</span>
+                        </p>
+                        <div class="mt-auto pt-3">
+                            <a th:href="@{/reservas/crear/{id}(id=${evento.id})}"
+                                class="btn btn-outline-secondary w-100">Reservar Entrada</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${eventosProximos.isEmpty()}" class="alert alert-warning text-center mt-5">
+            No hay eventos programados para el futuro cercano.
+        </div>
+
+        <div class="text-center mt-5 mb-5">
+            <a th:href="@{/eventos}" class="btn btn-brown btn-lg shadow-sm">Ver Todo el Calendario</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

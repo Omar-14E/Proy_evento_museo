@@ -1,0 +1,54 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f7f4;
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Playfair Display', serif;
+}
+
+.color-museo {
+    color: #6d4c41 !important;
+}
+
+.bg-museo-brown {
+    background-color: #6d4c41 !important;
+}
+
+.btn-brown {
+    background-color: #6d4c41;
+    border-color: #6d4c41;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-brown:hover {
+    background-color: #4e342e;
+    border-color: #4e342e;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.card {
+    border: none;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+    border-top: 4px solid #6d4c41;
+}
+
+.btn-action-group .btn-info {
+    background-color: #9c847d;
+    border-color: #9c847d;
+    color: white;
+}

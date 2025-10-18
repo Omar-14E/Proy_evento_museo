@@ -1,0 +1,63 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f7f4;
+}
+
+h1,
+h2 {
+    font-family: 'Playfair Display', serif;
+}
+
+.color-museo {
+    color: #6d4c41 !important;
+}
+
+.bg-museo-brown {
+    background-color: #6d4c41 !important;
+}
+
+.btn-brown {
+    background-color: #6d4c41;
+    border-color: #6d4c41;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-brown:hover {
+    background-color: #4e342e;
+    border-color: #4e342e;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.table {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+}
+
+.table thead {
+    background-color: #f2f2f2;
+    color: #333;
+    font-weight: 500;
+}
+
+.table-striped>tbody>tr:nth-of-type(odd)>* {
+    background-color: #fcfcfc;
+}
+
+.btn-info {
+    background-color: #9c847d;
+    border-color: #9c847d;
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #6d4c41;
+    border-color: #6d4c41;
+}
+
+.eliminar-evento-btn {
+    cursor: pointer;
+}

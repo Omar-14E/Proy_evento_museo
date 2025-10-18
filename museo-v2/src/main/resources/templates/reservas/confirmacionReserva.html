@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva Exitosa - Museo Sipan</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="icon" type="image/png" th:href="@{/images/icono.png}">   
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400&display=swap"
+        rel="stylesheet">
+
+
+    <style>
+        .text-success-museo {
+            color: #28a745 !important;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+        }
+
+        .card-reserva {
+            border: 1px solid #6d4c41;
+        }
+
+        .bg-museo-brown {
+            background-color: #6d4c41 !important;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-museo-brown">
+        <div class="container-fluid">
+            <a class="navbar-brand" th:href="@{/}">Museo Tumbas Reales de Sipan</a>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+
+                <div class="card p-5 shadow-lg card-reserva text-center">
+
+                    <h2 class="text-success-museo mb-4">¡Reserva Confirmada Exitosamente!</h2>
+
+                    <p class="lead">Gracias por tu reserva, <strong class="color-museo"
+                            th:text="${reserva.nombreCompleto}">[Nombre del Cliente]</strong>.</p>
+                    <hr>
+
+                    <div class="text-start p-4 mb-4" style="background-color: #f8f7f4; border-radius: 8px;">
+                        <h5 class="color-museo mb-3">Detalles de tu Compra:</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><strong>Código de Reserva:</strong> <span class="fw-bold text-dark"
+                                    th:text="${reserva.id}">1234</span></li>
+                            <li class="mb-2"><strong>Evento:</strong> <span th:text="${reserva.evento.nombre}">Nombre
+                                    del Evento</span></li>
+                            <li class="mb-2"><strong>Fecha y Hora:</strong> <span
+                                    th:text="${#temporals.format(reserva.evento.fechaInicio, 'dd-MM-yyyy')} + ' a las ' + ${#temporals.format(reserva.evento.horaInicio, 'HH:mm')}"></span>
+                            </li>
+                            <li class="mb-2"><strong>Entradas Compradas:</strong> <span
+                                    th:text="${reserva.nEntradas}">2</span></li>
+                        </ul>
+                    </div>
+
+                    <div
+                        class="p-3 mb-4 bg-success-subtle text-success border border-success rounded d-flex justify-content-between align-items-center">
+                        <strong style="font-size: 1.1rem;">TOTAL PAGADO:</strong>
+                        <span style="font-size: 1.4rem;" class="fw-bold"
+                            th:text="'S/ ' + ${#numbers.formatDecimal(reserva.totalPagar, 0, 'POINT', 2, 'COMMA')}">S/
+                            30.00</span>
+                    </div>
+
+                    <a th:href="@{/}" class="btn btn-brown btn-lg mt-3 shadow">Volver al Inicio</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

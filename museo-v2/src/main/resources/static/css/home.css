@@ -1,0 +1,77 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f7f4;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-family: 'Playfair Display', serif;
+    color: #333;
+}
+
+.color-museo {
+    color: #6d4c41 !important;
+}
+
+.bg-museo-brown {
+    background-color: #6d4c41 !important;
+}
+
+.hero-section {
+    background-image: url('/images/museoImg.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.hero-content {
+    z-index: 10;
+    text-align: center;
+}
+
+.card-img-top {
+    height: 220px;
+    object-fit: cover;
+    border-top: 3px solid #6d4c41;
+}
+
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn-brown {
+    background-color: #6d4c41;
+    border-color: #6d4c41;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-brown:hover {
+    background-color: #4e342e;
+    border-color: #4e342e;
+    color: white;
+    transform: translateY(-2px);
+}

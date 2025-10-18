@@ -1,0 +1,29 @@
+.bg-museo-brown {
+    background-color: #6d4c41 !important;
+}
+
+.color-museo {
+    color: #6d4c41 !important;
+}
+
+.btn-brown {
+    background-color: #6d4c41;
+    border-color: #6d4c41;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-brown:hover {
+    background-color: #4e342e;
+    border-color: #4e342e;
+    color: white;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+h1,
+h2 {
+    font-family: 'Playfair Display', serif;
+}
