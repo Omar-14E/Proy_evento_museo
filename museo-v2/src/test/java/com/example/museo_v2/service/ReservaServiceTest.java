@@ -27,9 +27,10 @@ import com.example.museo_v2.repository.ReservaRepositorio;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservaServiceTest {
-    
+
     @Mock
     private ReservaRepositorio reservaRepositorio;
+
     @Mock
     private EventoService eventoService;
 
@@ -37,18 +38,19 @@ public class ReservaServiceTest {
     private ReservaService reservaService;
 
     private Reserva reserva1;
-
     private Evento evento1;
 
+    /**
+     * Inicializa los objetos de prueba antes de cada test.
+     * Se configura un evento y una reserva de ejemplo.
+     */
     @BeforeEach
-    void setUp(){
-        //Declaración de evento para después utilizarlo en reserva
+    void setUp() {
         evento1 = new Evento();
-        evento1.setId(1L); 
+        evento1.setId(1L);
         evento1.setNombre("Evento Pasado");
         evento1.setFechaInicio(LocalDate.now().minusDays(10));
 
-        //Declaración de una reserva
         reserva1 = new Reserva();
         reserva1.setId(1L);
         reserva1.setNombreCompleto("Reserva numero 1");
@@ -60,23 +62,30 @@ public class ReservaServiceTest {
         reserva1.setTipoComprobante("Boleta");
         reserva1.setMetodoPago("Efectivo");
         reserva1.setFechaReserva(LocalDateTime.now());
-
     }
 
+    /**
+     * Verifica que al guardar una reserva, se invoque correctamente
+     * el método {@code save()} del repositorio y {@code obtenerEventoPorId()}
+     * del servicio de eventos.
+     */
     @Test
-    void guardarReserva_DebeLlamarAlRepositorioSave(){
+    void guardarReserva_DebeLlamarAlRepositorioSave() {
         when(eventoService.obtenerEventoPorId(evento1.getId())).thenReturn(evento1);
         when(reservaRepositorio.save(any(Reserva.class))).thenReturn(reserva1);
 
-        Reserva reservaGuardada = reservaService.guardarReserva(reserva1,evento1.getId());
+        Reserva reservaGuardada = reservaService.guardarReserva(reserva1, evento1.getId());
 
         assertNotNull(reservaGuardada);
-        verify(reservaRepositorio,times(1)).save(reserva1);
-        verify(eventoService,times(1)).obtenerEventoPorId(evento1.getId());
+        verify(reservaRepositorio, times(1)).save(reserva1);
+        verify(eventoService, times(1)).obtenerEventoPorId(evento1.getId());
     }
 
+    /**
+     * Verifica que se devuelva una reserva existente al buscar por su ID.
+     */
     @Test
-    void obtenerReservaPorId_CuandoExiste_DebeDevolverReserva(){
+    void obtenerReservaPorId_CuandoExiste_DebeDevolverReserva() {
         when(reservaRepositorio.findById(1L)).thenReturn(Optional.of(reserva1));
 
         Reserva reservaEncontrada = reservaService.obtenerReservaPorId(1L);
@@ -85,6 +94,9 @@ public class ReservaServiceTest {
         assertEquals(1L, reservaEncontrada.getId());
     }
 
+    /**
+     * Verifica que se devuelva {@code null} al buscar una reserva inexistente.
+     */
     @Test
     void obtenerReservaPorId_CuandoNoExiste_DebeDevolverNull() {
         when(reservaRepositorio.findById(99L)).thenReturn(Optional.empty());
