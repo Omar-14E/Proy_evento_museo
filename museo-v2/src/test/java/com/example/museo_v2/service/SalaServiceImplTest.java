@@ -10,6 +10,9 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,20 +20,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.mockito.MockedStatic;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import com.example.museo_v2.model.Sala;
 import com.example.museo_v2.repository.SalaRepositorio;
 
 @ExtendWith(MockitoExtension.class)
 public class SalaServiceImplTest {
+
     @Mock
     private SalaRepositorio salaRepositorio;
 
@@ -40,6 +40,11 @@ public class SalaServiceImplTest {
     private Sala sala;
     private Sala sala2;
 
+    /**
+     * Inicializa los objetos necesarios antes de cada prueba.
+     * Se asigna un directorio temporal para simular la carga de archivos
+     * y se crean dos instancias de {@link Sala} para las pruebas.
+     */
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(salaService, "uploadDir", System.getProperty("java.io.tmpdir"));
@@ -61,6 +66,10 @@ public class SalaServiceImplTest {
         sala2.setImagenUrl("./src/main/resources/static/uploads/salas/30d37096-2806-436a-ac0e-9ed71a0ac969.jpg");
     }
 
+    /**
+     * Verifica que el método {@code listarTodasLasSalas()} devuelva una lista
+     * con todas las salas registradas y que invoque al repositorio una sola vez.
+     */
     @Test
     void listarTodasLasSalas_DebeDevolverListaDeSalas() {
         when(salaRepositorio.findAll()).thenReturn(Arrays.asList(sala, sala2));
@@ -72,6 +81,10 @@ public class SalaServiceImplTest {
         verify(salaRepositorio, times(1)).findAll();
     }
 
+    /**
+     * Verifica que el método {@code obtenerSalaPorId()} devuelva una sala existente
+     * cuando el identificador se encuentra en el repositorio.
+     */
     @Test
     void obtenerSalaPorId_CuandoExiste_DebeDevolverReserva() {
         when(salaRepositorio.findById(1)).thenReturn(Optional.of(sala));
@@ -82,6 +95,10 @@ public class SalaServiceImplTest {
         assertEquals(1, salaEncontrada.getId());
     }
 
+    /**
+     * Verifica que el método {@code obtenerSalaPorId()} devuelva {@code null}
+     * cuando no existe una sala con el identificador especificado.
+     */
     @Test
     void obtenerSalaPorId_CuandoNoExiste_DebeDevolverNull() {
         when(salaRepositorio.findById(99)).thenReturn(Optional.empty());
@@ -91,6 +108,10 @@ public class SalaServiceImplTest {
         assertNull(salaEncontrada);
     }
 
+    /**
+     * Verifica que al guardar una sala con una nueva imagen,
+     * el servicio asigne correctamente una URL de imagen y guarde la entidad.
+     */
     @Test
     void guardarSala_conImagenNueva_debeGuardarSalaConUrl() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
@@ -112,6 +133,10 @@ public class SalaServiceImplTest {
         verify(salaRepositorio, times(1)).save(nuevaSala);
     }
 
+    /**
+     * Verifica que al guardar una sala sin imagen nueva,
+     * se guarde sin modificar el campo {@code imagenUrl}.
+     */
     @Test
     void guardarSala_sinImagenNueva_debeGuardarSalaSinCambiosEnUrl() {
         Sala nuevaSala = new Sala();
@@ -126,6 +151,10 @@ public class SalaServiceImplTest {
         verify(salaRepositorio, times(1)).save(nuevaSala);
     }
 
+    /**
+     * Verifica que si se guarda una sala existente sin nueva imagen,
+     * se conserve la URL anterior en lugar de sobrescribirla.
+     */
     @Test
     void guardarSala_existenteSinNuevaImagen_debeMantenerImagenAnterior() {
         Sala existente = new Sala();
@@ -143,6 +172,12 @@ public class SalaServiceImplTest {
         verify(salaRepositorio, times(1)).save(existente);
     }
 
+    /**
+     * Verifica que, si ocurre una {@link IOException} durante la escritura del
+     * archivo,
+     * el método {@code guardarSala()} devuelva {@code null} y no lance una
+     * excepción.
+     */
     @Test
     void guardarSala_cuandoOcurreIOException_debeDevolverNull() throws Exception {
         Sala sala = new Sala();
@@ -150,8 +185,8 @@ public class SalaServiceImplTest {
 
         try (MockedStatic<Files> mockedFiles = org.mockito.Mockito.mockStatic(Files.class)) {
             mockedFiles
-                .when(() -> Files.write(ArgumentMatchers.<Path>any(), ArgumentMatchers.<byte[]>any()))
-                .thenThrow(new IOException("Error simulado"));
+                    .when(() -> Files.write(ArgumentMatchers.<Path>any(), ArgumentMatchers.<byte[]>any()))
+                    .thenThrow(new IOException("Error simulado"));
 
             Sala resultado = salaService.guardarSala(sala, file);
             assertNull(resultado);
