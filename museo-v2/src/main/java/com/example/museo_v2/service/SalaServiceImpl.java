@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.Optional;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Implementación del servicio de salas.
  * Proporciona la lógica de negocio para manejar las salas, incluyendo la gestión de imágenes asociadas a ellas.
@@ -62,45 +65,58 @@ public class SalaServiceImpl implements SalaService {
 
     /**
      * Guarda una sala en la base de datos, incluyendo la imagen asociada (si se proporciona).
-     * 
+     * Este método ha sido refactorizado para usar Apache Commons IO y Lang.
+     *
      * @param sala La sala a guardar.
      * @param file El archivo de la imagen asociada a la sala.
-     * @return La sala guardada, con la URL de la imagen si se proporcionó un archivo.
+     * @return La sala guardada.
      */
     @Override
     public Sala guardarSala(Sala sala, MultipartFile file) {
         try {
-            // Lógica para guardar la imagen asociada a la sala
-            if (file != null && !file.isEmpty()) {
-                // Obtener el nombre y extensión del archivo
-                String originalFileName = file.getOriginalFilename();
-                String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-                
-                // Generar un nombre único para el archivo
-                String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
-                Path fileNameAndPath = Paths.get(uploadDir, uniqueFileName);
+            // 1. LÓGICA DE ACTUALIZACIÓN (para no perder la imagen si no se cambia)
+            // Si la sala ya tiene un ID, significa que la estamos editando.
+            if (sala.getId() != null) {
+                // Obtenemos la URL de la imagen que ya está en la BD.
+                Sala salaExistente = salaRepositorio.findById(sala.getId())
+                        .orElse(null);
 
-                // Crear el directorio si no existe y guardar el archivo
-                Files.createDirectories(fileNameAndPath.getParent());
-                Files.write(fileNameAndPath, file.getBytes());
-
-                // Establecer la URL de la imagen en la sala
-                sala.setImagenUrl("/uploads/salas/" + uniqueFileName);
-            } 
-            // Si ya existe una sala, pero no se proporciona una nueva imagen
-            else if (sala.getId() != null && sala.getImagenUrl() == null) {
-                // No se hace nada
-            } 
-            // Si se está editando una sala, pero no se proporciona una nueva imagen
-            else if (sala.getId() != null && (file == null || file.isEmpty())) {
-                // Recuperar la imagen existente asociada a la sala
-                Sala existingSala = salaRepositorio.findById(sala.getId()).orElse(null);
-                if (existingSala != null) {
-                    sala.setImagenUrl(existingSala.getImagenUrl());
+                if (salaExistente != null) {
+                    // Establecemos la imagenUrl antigua por defecto.
+                    // Si se sube una nueva imagen, esta línea se sobrescribirá más abajo.
+                    sala.setImagenUrl(salaExistente.getImagenUrl());
                 }
             }
 
-            // Guardar y devolver la sala
+            // 2. --- AQUÍ USAMOS COMMONS LANG ---
+            // Verificamos si se subió un archivo válido.
+            // StringUtils.isBlank() comprueba que el nombre no sea null, ni "", ni " " (solo espacios).
+
+            boolean hayArchivoNuevo = (file != null && !StringUtils.isBlank(file.getOriginalFilename()));
+
+            if (hayArchivoNuevo) {
+
+                String originalFileName = file.getOriginalFilename();
+
+                // 3. --- AQUÍ USAMOS COMMONS IO ---
+                // Obtenemos la extensión del archivo de forma segura (ej: "jpg", "png").
+                String fileExtension = FilenameUtils.getExtension(originalFileName);
+
+                // (Si quieres borrar la imagen antigua antes de guardar la nueva, este es un buen lugar)
+
+                // 4. CREACIÓN DE NOMBRE Y GUARDADO
+                String uniqueFileName = UUID.randomUUID().toString() + "." + fileExtension;
+                Path fileNameAndPath = Paths.get(uploadDir, uniqueFileName);
+
+                Files.createDirectories(fileNameAndPath.getParent());
+                Files.write(fileNameAndPath, file.getBytes());
+
+                // 5. Actualizamos la URL en el objeto 'sala'
+                sala.setImagenUrl("/uploads/salas/" + uniqueFileName);
+            }
+
+            // 6. GUARDADO FINAL
+            // Guardamos la sala (ya sea con la URL de la imagen nueva o con la antigua)
             return salaRepositorio.save(sala);
 
         } catch (IOException e) {
