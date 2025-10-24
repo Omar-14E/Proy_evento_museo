@@ -48,6 +48,10 @@
             <a th:href="@{/eventos/nuevo}" class="btn btn-brown btn-lg shadow-sm">
                 Registrar Nuevo Evento
             </a>
+
+            <a th:href="@{/eventos/exportar/excel}" class="btn btn-success btn-lg shadow-sm" style="margin-left: 10px;">
+                Descargar Reporte en Excel
+            </a>
         </div>
 
         <div class="table-responsive">
@@ -76,11 +80,13 @@
                                 Editar
                             </a>
                             
-                            <a th:href="@{/eventos/eliminar/{id}(id=${evento.id})}"
-                                class="btn btn-sm btn-danger shadow-sm eliminar-evento-btn"
-                                th:data-evento-nombre="${evento.nombre}">
-                                Eliminar
-                            </a>
+                            <form th:action="@{/eventos/eliminar/{id}(id=${evento.id})}" th:method="post" style="display: inline-block;">
+                                <button type="submit" 
+                                        class="btn btn-sm btn-danger shadow-sm eliminar-evento-btn"
+                                        th:data-evento-nombre="${evento.nombre}">
+                                    Eliminar
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 </tbody>
