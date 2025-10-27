@@ -1,6 +1,8 @@
 package com.example.museo_v2.service;
 
 import com.example.museo_v2.model.Evento;
+import com.example.museo_v2.model.Sala;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -84,6 +86,48 @@ public class ExcelService {
             // 9. Manejo de errores
             // Si algo falla (ej. error de I/O), lanzamos una RuntimeException.
             // Esto será capturado por el manejador de excepciones de Spring.
+            throw new RuntimeException("Error al generar el archivo Excel", e);
+        }
+    }
+
+    public ByteArrayInputStream crearExcelDeSalas(List<Sala> salas) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            
+            Sheet sheet = workbook.createSheet("Salas");
+            
+            Row headerRow = sheet.createRow(0);
+
+            String[] headers = {"ID","Nombre","Capacidad","Ubicación","Descripción"};
+
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+            }
+
+            int rowIdx = 1;
+            for(Sala sala: salas){
+                Row row = sheet.createRow(rowIdx++);
+
+                row.createCell(0).setCellValue(sala.getId());
+
+                row.createCell(1).setCellValue(sala.getNombre());
+
+                row.createCell(2).setCellValue(sala.getCapacidad());
+
+                row.createCell(3).setCellValue(sala.getUbicacion());
+
+                row.createCell(4).setCellValue(sala.getDescripcion());
+            }
+
+            for(int i=0; i<headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+
+            return new ByteArrayInputStream(out.toByteArray());
+        }catch(Exception e){
             throw new RuntimeException("Error al generar el archivo Excel", e);
         }
     }
