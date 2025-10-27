@@ -8,13 +8,6 @@ import java.util.Optional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-/**
- * Implementación del servicio para la gestión de usuarios.
- * Esta clase provee la lógica de negocio sobre la entidad Usuario, utilizando el repositorio.
- *
- * @author TuNombre
- * @since 1.0
- */
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
