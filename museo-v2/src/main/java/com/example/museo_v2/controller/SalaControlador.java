@@ -1,13 +1,22 @@
 package com.example.museo_v2.controller;
 
 import com.example.museo_v2.model.Sala;
+import com.example.museo_v2.service.ExcelService;
 import com.example.museo_v2.service.SalaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Controlador para manejar las salas dentro del museo.
@@ -20,6 +29,8 @@ public class SalaControlador {
     @Autowired
     private SalaService salaService;
 
+    @Autowired
+    private ExcelService excelService;
     /**
      * Método que lista todas las salas disponibles en el museo.
      * 
@@ -88,5 +99,24 @@ public class SalaControlador {
     public String eliminarSala(@PathVariable Integer id) {
         salaService.eliminarSala(id);
         return "redirect:/salas";
+    }
+
+    @GetMapping("/exportar/excel")
+    public ResponseEntity<Resource> exportarSalasExcel() {
+
+        List<Sala> salas = salaService.listarTodasLasSalas();
+
+        ByteArrayInputStream excelFile = excelService.crearExcelDeSalas(salas);
+
+        HttpHeaders headers = new HttpHeaders();
+        String filename = "reporte_salas.xlsx";
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+
+        InputStreamResource resource = new InputStreamResource(excelFile);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(resource);
     }
 }
