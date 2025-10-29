@@ -3,14 +3,11 @@ package com.example.museo_v2.controller;
 import com.example.museo_v2.model.Usuario;
 import com.example.museo_v2.service.UsuarioService;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.BindingResult;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Controlador para la gestión de usuarios y manejo de vistas Thymeleaf (login,
@@ -21,7 +18,6 @@ import java.util.Optional;
 public class UsuarioControlador {
 
     private final UsuarioService usuarioService;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     
     public UsuarioControlador(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
@@ -65,19 +61,6 @@ public class UsuarioControlador {
         usuarioService.crearUsuario(usuario);
         return "redirect:/usuarios/login";
     }
-
-    @PostMapping("/login")
-public String loginPost(@RequestParam String username, @RequestParam String password, Model model) {
-    Optional<Usuario> usuario = usuarioService.obtenerPorNombreUsuario(username);
-    if (usuario.isPresent() && 
-        passwordEncoder.matches(password, usuario.get().getClave())) {
-        return "redirect:/usuarios/lista";
-    } else {
-        model.addAttribute("loginError", true);
-        return "redirect:/usuarios/login";
-    }
-}
-
 
     /**
      * Vista de listado de usuarios
