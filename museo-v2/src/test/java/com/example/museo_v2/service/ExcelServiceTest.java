@@ -65,4 +65,34 @@ public class ExcelServiceTest {
             assertEquals("sala de Niños", datRow1.getCell(4).getStringCellValue());
         }
     }
+
+    @Test
+    void crearExcelDeSalas_DebeGenerarContenidoCorrecto() throws Exception {
+        Sala sala1 = new Sala("Sala A", 100, "Piso 1", "Desc A", null);
+        sala1.setId(1);
+        List<Sala> salas = Arrays.asList(sala1);
+
+        ByteArrayInputStream bais = excelService.crearExcelDeSalas(salas);
+        assertNotNull(bais);
+
+        try (Workbook workbook = new XSSFWorkbook(bais)) {
+            Sheet sheet = workbook.getSheet("Salas");
+            assertNotNull(sheet);
+
+            Row headerRow = sheet.getRow(0);
+            assertEquals("ID", headerRow.getCell(0).getStringCellValue());
+            assertEquals("Nombre", headerRow.getCell(1).getStringCellValue());
+            assertEquals("Capacidad", headerRow.getCell(2).getStringCellValue());
+            assertEquals("Ubicación", headerRow.getCell(3).getStringCellValue());
+            assertEquals("Descripción", headerRow.getCell(4).getStringCellValue());
+
+            Row dataRow1 = sheet.getRow(1);
+            assertEquals(1.0, dataRow1.getCell(0).getNumericCellValue()); 
+            assertEquals("Sala A", dataRow1.getCell(1).getStringCellValue()); 
+            assertEquals(100.0, dataRow1.getCell(2).getNumericCellValue()); 
+            assertEquals("Piso 1", dataRow1.getCell(3).getStringCellValue()); 
+            assertEquals("Desc A", dataRow1.getCell(4).getStringCellValue()); 
+        }
+    }
 }
+

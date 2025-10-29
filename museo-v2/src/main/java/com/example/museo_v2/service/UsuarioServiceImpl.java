@@ -5,26 +5,33 @@ import com.example.museo_v2.repository.UsuarioRepositorio;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.ArrayList;
 
+/**
+ * Implementación del servicio para gestionar usuarios.
+ * Proporciona operaciones CRUD y soporte para autenticación.
+ */
 @Service
-public class UsuarioServiceImpl implements UsuarioService {
+public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
 
     private final UsuarioRepositorio usuarioRepositorio;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
+
     /**
-     * Constructor que inyecta el repositorio de usuarios.
-     * @param usuarioRepositorio repositorio JPA para Usuario
+     * Constructor que inyecta el repositorio y el codificador de contraseñas.
      */
-    public UsuarioServiceImpl(UsuarioRepositorio usuarioRepositorio) {
+    public UsuarioServiceImpl(UsuarioRepositorio usuarioRepositorio, PasswordEncoder passwordEncoder) {
         this.usuarioRepositorio = usuarioRepositorio;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
-     * Crea un nuevo usuario en la base de datos.
-     * @param usuario objeto Usuario a crear
-     * @return el Usuario creado
+     * Crea un nuevo usuario con contraseña encriptada.
      */
     @Override
     public Usuario crearUsuario(Usuario usuario) {
@@ -34,9 +41,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     /**
-     * Obtiene un usuario según su ID.
-     * @param id identificador del usuario
-     * @return el Usuario encontrado o null si no existe
+     * Busca un usuario por su ID.
      */
     @Override
     public Usuario obtenerUsuarioPorId(Long id) {
@@ -44,8 +49,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     /**
-     * Obtiene la lista de todos los usuarios registrados.
-     * @return lista de usuarios
+     * Devuelve la lista completa de usuarios.
      */
     @Override
     public List<Usuario> listarUsuarios() {
@@ -53,10 +57,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     /**
-     * Actualiza los datos de un usuario existente, identificado por su ID.
-     * @param id identificador del usuario a actualizar
-     * @param usuario nuevo objeto Usuario con datos actualizados
-     * @return el Usuario actualizado
+     * Actualiza los datos de un usuario existente.
      */
     @Override
     public Usuario actualizarUsuario(Long id, Usuario usuario) {
@@ -66,7 +67,6 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     /**
      * Elimina un usuario por su ID.
-     * @param id identificador del usuario a eliminar
      */
     @Override
     public void eliminarUsuario(Long id) {
@@ -75,11 +75,21 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     /**
      * Busca un usuario por su nombre de usuario.
-     * @param nombreUsuario nombre de usuario del Usuario
-     * @return Optional con el Usuario encontrado, o vacío si no existe
      */
     @Override
     public Optional<Usuario> obtenerPorNombreUsuario(String nombreUsuario) {
         return usuarioRepositorio.findByNombreUsuario(nombreUsuario);
+    }
+
+    /**
+     * Carga los detalles del usuario para la autenticación de Spring Security.
+     */
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Usuario usuario = usuarioRepositorio.findByNombreUsuario(username)
+                .orElseThrow(() -> 
+                    new UsernameNotFoundException("Usuario no encontrado: " + username));
+
+        return new User(usuario.getNombreUsuario(), usuario.getClave(), new ArrayList<>());
     }
 }
