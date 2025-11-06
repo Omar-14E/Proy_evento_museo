@@ -2,14 +2,21 @@ package com.example.museo_v2.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
+// --- Anotaciones añadidas ---
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
-@Data
+@Getter 
+@Setter 
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor 
 @Entity
 @Table(name = "Sala")
+@EqualsAndHashCode(of = "nombre")
 public class Sala {
 
     @Id
