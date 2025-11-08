@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 /**
  * Representa una reserva realizada para un evento en el museo.
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
+@EqualsAndHashCode(of = "dniRuc")
 @Table(name = "reservas")
 public class Reserva {
 

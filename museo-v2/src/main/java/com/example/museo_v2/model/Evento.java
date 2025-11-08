@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 /**
  * Representa un evento dentro del museo.
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(of = "nombre")
 @Entity
 @Table(name = "Evento")
 public class Evento {
