@@ -36,6 +36,13 @@
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/salas}">Salas</a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/inventario/lista}">
+                            <i class="bi bi-box-seam"></i> Inventario
+                        </a>
+                    </li>
+
                     <li class="nav-item">
                         <form th:action="@{/logout}" method="post" class="d-inline">
                             <button type="submit" class="nav-link btn btn-link" style="color: rgba(255,255,255,.55);">
@@ -118,6 +125,25 @@
                                 </option>
                             </select>
                         </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Productos de inventario para usar:</label>
+                            <div class="row">
+                                <div class="col-md-6" th:each="producto : ${productosDisponibles}">
+                                    <div class="form-check mb-2 shadow-sm p-2 border rounded">
+                                        <input class="form-check-input" type="checkbox" name="productoIds"
+                                            th:id="${'producto'+producto.id}" th:value="${producto.id}">
+                                        <label class="form-check-label" th:for="${'producto'+producto.id}">
+                                            <span th:text="${producto.nombre}"></span>
+                                            <span class="text-muted">|</span>
+                                            <span th:text="${producto.tipo}"></span>
+                                            <span class="badge bg-secondary ms-2" th:text="${producto.estado}"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-center pt-3">
                             <button type="submit" class="btn btn-brown btn-lg px-5 shadow-sm">
