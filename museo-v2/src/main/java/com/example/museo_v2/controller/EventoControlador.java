@@ -5,6 +5,7 @@ import com.example.museo_v2.model.Evento;
 
 import com.example.museo_v2.service.EventoService;
 import com.example.museo_v2.service.ExcelService;
+import com.example.museo_v2.service.ProductoInventarioService;
 import com.example.museo_v2.service.SalaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -39,6 +40,9 @@ public class EventoControlador {
     @Autowired
     private ExcelService excelService;
 
+    @Autowired
+    private ProductoInventarioService productoInventarioService;
+
     /**
      * Método para listar todos los eventos registrados en el museo.
      * 
@@ -61,6 +65,7 @@ public class EventoControlador {
     public String mostrarFormularioRegistro(Model modelo) {
         modelo.addAttribute("evento", new Evento());
         modelo.addAttribute("salas", salaService.listarSalasDisponibles());
+        modelo.addAttribute("productosDisponibles", productoInventarioService.productosDisponibles());
         return "eventos/formularioEvento";
     }
 
@@ -71,19 +76,19 @@ public class EventoControlador {
      * @return Redirige a la lista de eventos después de guardar el evento.
      */
     @PostMapping("/guardar")
-    public String guardarEvento(@ModelAttribute("evento") Evento evento) {
+    public String guardarEvento(@ModelAttribute Evento evento,
+                                @RequestParam(required=false) List<Long> productoIds) {
         Preconditions.checkNotNull(evento, "El objeto Evento no puede ser nulo");
-        
-        Preconditions.checkArgument(
-            !Strings.isNullOrEmpty(evento.getNombre()), 
-            "El nombre del evento no puede estar vacío"
-        );
-        
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(evento.getNombre()), "El nombre del evento no puede estar vacío");
         Preconditions.checkNotNull(evento.getSala(), "El evento debe tener una sala asignada");
-        
         eventoService.guardarEvento(evento);
+
+        if (productoIds != null && !productoIds.isEmpty()) {
+            productoInventarioService.asignarAEvento(productoIds, evento);
+        }
         return "redirect:/eventos";
     }
+
 
     /**
      * Método que muestra el formulario para editar un evento existente.
@@ -96,16 +101,15 @@ public class EventoControlador {
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEdicion(@PathVariable Long id, Model modelo) {
         Evento evento = eventoService.obtenerEventoPorId(id);
+        if (evento == null) throw new IllegalArgumentException("ID de Evento no válido: " + id);
 
-        //if (evento == null) {
-          //  throw new IllegalArgumentException("ID de Evento no válido:" + id);
-        //} Reemplazado por preconditions
-
-        Preconditions.checkNotNull(evento, "No se encontró un evento con el ID: %s", id);
         modelo.addAttribute("evento", evento);
         modelo.addAttribute("salas", salaService.listarSalasDisponibles());
+        modelo.addAttribute("productosDisponibles", productoInventarioService.productosDisponibles());
+        modelo.addAttribute("productosAsignados", productoInventarioService.productosPorEvento(evento));
         return "eventos/formularioEvento";
     }
+
 
     /**
      * Método para eliminar un evento existente.
@@ -115,9 +119,14 @@ public class EventoControlador {
      */
     @PostMapping("/eliminar/{id}")
     public String eliminarEvento(@PathVariable Long id) {
-        eventoService.eliminarEvento(id);
+        Evento evento = eventoService.obtenerEventoPorId(id);
+        if (evento != null) {
+            productoInventarioService.liberarProductosDeEvento(evento);
+            eventoService.eliminarEvento(id);
+        }
         return "redirect:/eventos";
     }
+
     
     /**
      * Maneja la solicitud GET para exportar la lista completa de eventos a un archivo Excel.
@@ -153,4 +162,6 @@ public class EventoControlador {
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(resource);
     }
+
+    
 }
