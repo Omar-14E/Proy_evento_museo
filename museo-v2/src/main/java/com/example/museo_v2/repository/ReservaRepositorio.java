@@ -6,10 +6,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 
+/**
+ * Repositorio para la gestión de reservas del museo.
+ * Incluye consultas adicionales relacionadas con ingresos.
+ */
 @Repository
 public interface ReservaRepositorio extends JpaRepository<Reserva, Long> {
-    
-    // Sumar todo el dinero recaudado
+
+    /**
+     * Calcula el total de ingresos generados por todas las reservas.
+     * Si no existen registros, retorna 0.
+     *
+     * @return suma total del campo {@code totalPagar} en todas las reservas
+     */
     @Query("SELECT COALESCE(SUM(r.totalPagar), 0) FROM Reserva r")
     BigDecimal sumarIngresosTotales();
 }

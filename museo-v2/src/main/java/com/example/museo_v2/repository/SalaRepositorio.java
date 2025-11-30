@@ -10,5 +10,4 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface SalaRepositorio extends JpaRepository<Sala, Integer> {
-    // No es necesario agregar métodos adicionales si solo se requieren operaciones CRUD básicas.
 }

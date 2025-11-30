@@ -12,6 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Servicio para la gestión del inventario de productos, incluyendo consulta,
+ * reserva y liberación de stock según los eventos asociados.
+ */
 @Service
 public class ProductoInventarioService {
 
@@ -21,30 +25,58 @@ public class ProductoInventarioService {
     @Autowired
     private EventoProductoRepository eventoProductoRepo;
 
-    // Lista todo (incluso lo que no tiene stock)
+    /**
+     * Obtiene todos los productos registrados en el inventario,
+     * independientemente de su disponibilidad.
+     *
+     * @return lista completa de productos
+     */
     public List<ProductoInventario> findAll() {
         return productoRepo.findAll();
     }
 
-    // --- EL MÉTODO QUE FALTABA ---
-    // Devuelve solo los productos que tienen stock disponible > 0
+    /**
+     * Obtiene únicamente los productos con stock disponible mayor a cero.
+     *
+     * @return lista de productos disponibles
+     */
     public List<ProductoInventario> productosDisponibles() {
         return productoRepo.findByStockDisponibleGreaterThan(0);
     }
 
+    /**
+     * Busca un producto por su identificador.
+     *
+     * @param id identificador del producto
+     * @return el producto encontrado o {@code null} si no existe
+     */
     public ProductoInventario findById(Long id) {
         return productoRepo.findById(id).orElse(null);
     }
 
+    /**
+     * Guarda o actualiza un producto en el inventario.
+     * Si se crea uno nuevo y no se especifica el stock disponible,
+     * se asume que es igual al stock total.
+     *
+     * @param p producto a guardar
+     * @return el producto persistido
+     */
     public ProductoInventario guardar(ProductoInventario p) {
-        // Al crear uno nuevo, si no se especifica disponible, es igual al total
         if (p.getId() == null && p.getStockDisponible() == null) {
             p.setStockDisponible(p.getStockTotal());
         }
         return productoRepo.save(p);
     }
 
-    // Método transaccional para descontar stock
+    /**
+     * Reserva productos para un evento, descontando el stock disponible
+     * y registrando la asignación en la tabla intermedia.
+     *
+     * @param evento evento para el cual se reservarán productos
+     * @param requerimientos mapa donde la clave es el ID del producto
+     *                       y el valor la cantidad solicitada
+     */
     @Transactional
     public void reservarProductos(Evento evento, Map<Long, Integer> requerimientos) {
         for (Map.Entry<Long, Integer> entry : requerimientos.entrySet()) {
@@ -55,39 +87,39 @@ public class ProductoInventarioService {
                 ProductoInventario producto = productoRepo.findById(prodId)
                         .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + prodId));
 
-                // Validar Stock
                 if (producto.getStockDisponible() < cantidadSolicitada) {
                     throw new RuntimeException("Stock insuficiente para: " + producto.getNombre());
                 }
 
-                // Descontar Stock
                 producto.setStockDisponible(producto.getStockDisponible() - cantidadSolicitada);
                 productoRepo.save(producto);
 
-                // Registrar relación en tabla intermedia
                 EventoProducto asignacion = new EventoProducto();
                 asignacion.setEvento(evento);
                 asignacion.setProducto(producto);
                 asignacion.setCantidadAsignada(cantidadSolicitada);
-                
+
                 eventoProductoRepo.save(asignacion);
             }
         }
     }
 
-    // Método para devolver stock al eliminar un evento
+    /**
+     * Libera los productos asignados a un evento, devolviendo el stock
+     * y eliminando los registros intermedios.
+     *
+     * @param evento evento del cual se liberarán los productos
+     */
     @Transactional
     public void liberarProductos(Evento evento) {
         List<EventoProducto> asignaciones = eventoProductoRepo.findByEvento(evento);
 
         for (EventoProducto asignacion : asignaciones) {
             ProductoInventario producto = asignacion.getProducto();
-            
-            // Devolver cantidad al stock
+
             producto.setStockDisponible(producto.getStockDisponible() + asignacion.getCantidadAsignada());
             productoRepo.save(producto);
 
-            // Borrar registro de la tabla intermedia
             eventoProductoRepo.delete(asignacion);
         }
     }

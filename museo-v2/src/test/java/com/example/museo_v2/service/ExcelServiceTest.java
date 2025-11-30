@@ -12,29 +12,35 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayInputStream;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
+import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
-import java.time.LocalDate;
-import java.math.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Pruebas unitarias para {@link ExcelService}.
+ * Verifica la correcta generación de archivos Excel para eventos y salas.
+ */
 public class ExcelServiceTest {
 
     private ExcelService excelService;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         excelService = new ExcelService();
     }
 
-    @Test 
-    void crearExcelDeEventos_DebeGenerarElContenidoCorrecto() throws Exception{
+    /**
+     * Verifica que el método genere un Excel válido y que las celdas
+     * contengan la información correcta sobre eventos.
+     */
+    @Test
+    void crearExcelDeEventos_DebeGenerarElContenidoCorrecto() throws Exception {
         Sala sala = new Sala();
         sala.setNombre("sala de Niños");
-        
+
         Evento evento1 = new Evento();
         evento1.setId(1L);
         evento1.setNombre("Evento 1");
@@ -44,9 +50,10 @@ public class ExcelServiceTest {
 
         List<Evento> eventos = Arrays.asList(evento1);
         ByteArrayInputStream bais = excelService.crearExcelDeEventos(eventos);
+
         assertNotNull(bais);
 
-        try(Workbook workbook = new XSSFWorkbook(bais)){
+        try (Workbook workbook = new XSSFWorkbook(bais)) {
             Sheet sheet = workbook.getSheet("Eventos");
             assertNotNull(sheet);
 
@@ -66,13 +73,18 @@ public class ExcelServiceTest {
         }
     }
 
+    /**
+     * Verifica que el método genere un Excel válido con la información correcta
+     * sobre las salas registradas.
+     */
     @Test
     void crearExcelDeSalas_DebeGenerarContenidoCorrecto() throws Exception {
         Sala sala1 = new Sala("Sala A", 100, "Piso 1", "Desc A", null);
         sala1.setId(1);
-        List<Sala> salas = Arrays.asList(sala1);
 
+        List<Sala> salas = Arrays.asList(sala1);
         ByteArrayInputStream bais = excelService.crearExcelDeSalas(salas);
+
         assertNotNull(bais);
 
         try (Workbook workbook = new XSSFWorkbook(bais)) {
@@ -87,12 +99,11 @@ public class ExcelServiceTest {
             assertEquals("Descripción", headerRow.getCell(4).getStringCellValue());
 
             Row dataRow1 = sheet.getRow(1);
-            assertEquals(1.0, dataRow1.getCell(0).getNumericCellValue()); 
-            assertEquals("Sala A", dataRow1.getCell(1).getStringCellValue()); 
-            assertEquals(100.0, dataRow1.getCell(2).getNumericCellValue()); 
-            assertEquals("Piso 1", dataRow1.getCell(3).getStringCellValue()); 
-            assertEquals("Desc A", dataRow1.getCell(4).getStringCellValue()); 
+            assertEquals(1.0, dataRow1.getCell(0).getNumericCellValue());
+            assertEquals("Sala A", dataRow1.getCell(1).getStringCellValue());
+            assertEquals(100.0, dataRow1.getCell(2).getNumericCellValue());
+            assertEquals("Piso 1", dataRow1.getCell(3).getStringCellValue());
+            assertEquals("Desc A", dataRow1.getCell(4).getStringCellValue());
         }
     }
 }
-
