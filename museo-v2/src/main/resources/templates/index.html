@@ -47,7 +47,14 @@
                         
                         <li class="nav-item">
                             <a class="nav-link" href="#">
-                                <i class="bi bi-person-fill"></i> <span sec:authentication="name"></span> </a>
+                                <i class="bi bi-person-fill"></i> 
+                                <span sec:authentication="name"></span>
+                                
+                                <span class="badge bg-warning text-dark ms-2" 
+                                    sec:authorize="hasRole('ADMIN')">ADMIN</span>
+                                <span class="badge bg-info text-dark ms-2" 
+                                    sec:authorize="hasRole('TRABAJADOR')">STAFF</span>
+                            </a>
                         </li>
 
                         <li class="nav-item">

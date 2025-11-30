@@ -44,5 +44,5 @@ public class Usuario {
      * contraseña del usuario.
      */
     private String clave;
-
+    private String rol;
 }

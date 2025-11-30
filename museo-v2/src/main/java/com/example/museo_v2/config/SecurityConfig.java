@@ -10,32 +10,14 @@ import org.springframework.security.web.SecurityFilterChain;
 
 /**
  * Clase de configuración de seguridad para la aplicación del museo.
- * 
- * <p>Esta clase define la configuración de autenticación y autorización 
- * utilizando Spring Security. Se encarga de proteger las rutas de la aplicación,
- * establecer la página de inicio de sesión y definir el comportamiento 
- * del cierre de sesión.</p>
- * 
- * <p>La anotación {@link Configuration} indica que esta clase 
- * contiene beans de configuración. La anotación {@link EnableWebSecurity}
- * habilita las características de seguridad web de Spring Security.</p>
- * 
- * @author Omar
- * @version 2.0
+ * Define reglas de autorización, autenticación y manejo de excepciones.
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     /**
-     * Bean que define el codificador de contraseñas.
-     * 
-     * <p>Se utiliza {@link BCryptPasswordEncoder} para encriptar las contraseñas 
-     * de los usuarios antes de guardarlas en la base de datos. 
-     * BCrypt aplica un algoritmo de hash seguro que incluye un salt aleatorio 
-     * para evitar ataques por diccionario.</p>
-     * 
-     * @return un objeto {@link PasswordEncoder} basado en {@link BCryptPasswordEncoder}.
+     * Bean para encriptar contraseñas usando BCrypt.
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -43,48 +25,54 @@ public class SecurityConfig {
     }
     
     /**
-     * Configura las reglas de seguridad HTTP para la aplicación.
-     * 
-     * <p>Define qué rutas pueden ser accedidas sin autenticación y cuáles requieren 
-     * que el usuario haya iniciado sesión. También establece la página de inicio de sesión 
-     * personalizada y el comportamiento al cerrar sesión.</p>
-     * 
-     * @param http objeto {@link HttpSecurity} que permite configurar la seguridad HTTP.
-     * @return una instancia de {@link SecurityFilterChain} con las reglas configuradas.
-     * @throws Exception si ocurre un error durante la configuración.
+     * Configura la cadena de filtros de seguridad HTTP.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Configuración de autorización de rutas
+            // 1. Configuración de autorización de rutas
             .authorizeHttpRequests(authorize -> authorize
-                // Rutas públicas que no requieren autenticación
+                // Recursos estáticos y páginas públicas (incluyendo la página de error 403)
                 .requestMatchers(
-                    "/usuarios/login",     // Página de inicio de sesión
-                    "/usuarios/registro",  // Página de registro de nuevos usuarios
-                    "/css/**",             // Recursos estáticos (estilos CSS)
-                    "/images/**"           // Imágenes accesibles públicamente
+                    "/css/**", 
+                    "/images/**", 
+                    "/usuarios/login", 
+                    "/usuarios/registro",
+                    "/403"  // ¡Importante! Permitir acceso público a la página de error
                 ).permitAll()
                 
-                // Todas las demás rutas requieren autenticación
+                // --- REGLAS DE ROLES ---
+                
+                // Solo el ADMIN puede gestionar usuarios (ver lista, crear admin, etc.)
+                .requestMatchers("/usuarios/**").hasRole("ADMIN") 
+                
+                // Solo el ADMIN puede eliminar registros críticos
+                .requestMatchers("/eventos/eliminar/**", "/salas/eliminar/**").hasRole("ADMIN")
+
+                // Para todo lo demás (crear reservas, ver eventos, editar), se requiere estar autenticado
+                // (Tanto ADMIN como TRABAJADOR pueden entrar aquí)
                 .anyRequest().authenticated()
             )
             
-            // Configuración del formulario de inicio de sesión
+            // 2. Configuración del formulario de inicio de sesión
             .formLogin(form -> form
-                .loginPage("/usuarios/login")           // URL de la página de login personalizada
-                .loginProcessingUrl("/usuarios/login")  // URL que procesa el formulario de login
-                .defaultSuccessUrl("/", true)           // Redirección tras inicio de sesión exitoso
+                .loginPage("/usuarios/login")           // Nuestra vista personalizada
+                .loginProcessingUrl("/usuarios/login")  // URL donde se envía el POST del form
+                .defaultSuccessUrl("/", true)           // Redirigir al inicio tras login exitoso
                 .permitAll()
             )
             
-            // Configuración del cierre de sesión
+            // 3. Configuración del cierre de sesión
             .logout(logout -> logout
-                .logoutSuccessUrl("/usuarios/login?logout") // Redirección tras cerrar sesión
+                .logoutSuccessUrl("/usuarios/login?logout")
                 .permitAll()
+            )
+
+            // 4. Manejo de Excepciones (Página 403 personalizada)
+            .exceptionHandling(exception -> exception
+                .accessDeniedPage("/403")
             );
 
-        // Construye y devuelve la cadena de filtros de seguridad
         return http.build();
     }
 }

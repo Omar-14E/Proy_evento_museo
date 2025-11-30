@@ -10,7 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import java.util.ArrayList;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.Collections;
 
 /**
  * Implementación del servicio para gestionar usuarios.
@@ -90,6 +91,12 @@ public class UsuarioServiceImpl implements UsuarioService, UserDetailsService {
                 .orElseThrow(() -> 
                     new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-        return new User(usuario.getNombreUsuario(), usuario.getClave(), new ArrayList<>());
+                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority(usuario.getRol());
+
+        return new User(
+            usuario.getNombreUsuario(), 
+            usuario.getClave(), 
+            Collections.singletonList(authority) // Pasamos la autoridad aquí
+        );
     }
 }
