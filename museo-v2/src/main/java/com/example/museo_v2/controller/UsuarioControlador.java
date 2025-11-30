@@ -7,26 +7,26 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.BindingResult;
+
 import java.util.List;
 
 /**
- * Controlador para la gestión de usuarios y manejo de vistas Thymeleaf (login,
- * registro, listado).
+ * Controlador para la gestión de usuarios: login, registro y listado.
  */
 @Controller
 @RequestMapping("/usuarios")
 public class UsuarioControlador {
 
     private final UsuarioService usuarioService;
-    
+
     public UsuarioControlador(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
 
     /**
-     * Vista de login.
-     * 
-     * @return nombre archivo Thymeleaf login.html
+     * Muestra la vista de inicio de sesión.
+     *
+     * @return nombre de la vista de login
      */
     @GetMapping("/login")
     public String login() {
@@ -34,10 +34,10 @@ public class UsuarioControlador {
     }
 
     /**
-     * Vista de registro de usuario.
-     * 
-     * @param model modelo para el formulario
-     * @return nombre archivo Thymeleaf registro.html
+     * Muestra el formulario de registro.
+     *
+     * @param model modelo para transportar el objeto usuario
+     * @return vista de registro
      */
     @GetMapping("/registro")
     public String mostrarFormularioRegistro(Model model) {
@@ -46,33 +46,34 @@ public class UsuarioControlador {
     }
 
     /**
-     * Procesa el registro del usuario desde el formulario.
-     * 
-     * @param usuario datos desde el formulario
-     * @param result  validación
-     * @param model   modelo para la vista
-     * @return a login si ok, o vuelve a registro si falla
+     * Procesa el registro de un nuevo usuario.
+     *
+     * @param usuario datos del formulario
+     * @param result validación del formulario
+     * @param model modelo para la vista
+     * @return redirección a login si es exitoso, o vista de registro si falla
      */
     @PostMapping("/registro")
-    public String registrarUsuario(@ModelAttribute("usuario") Usuario usuario, BindingResult result, Model model) {
+    public String registrarUsuario(@ModelAttribute("usuario") Usuario usuario,
+                                   BindingResult result,
+                                   Model model) {
         if (result.hasErrors()) {
             return "usuarios/registro";
         }
-        
-        // Asignar rol por defecto si no viene del formulario
+
         if (usuario.getRol() == null || usuario.getRol().isEmpty()) {
             usuario.setRol("ROLE_TRABAJADOR");
         }
-        
+
         usuarioService.crearUsuario(usuario);
         return "redirect:/usuarios/login";
     }
 
     /**
-     * Vista de listado de usuarios
-     * 
-     * @param model Modelo para pasar usuarios
-     * @return nombre archivo Thymeleaf usuarios.html
+     * Muestra la lista de usuarios registrados.
+     *
+     * @param model modelo para enviar la lista de usuarios
+     * @return vista del listado de usuarios
      */
     @GetMapping("/lista")
     public String listarUsuarios(Model model) {

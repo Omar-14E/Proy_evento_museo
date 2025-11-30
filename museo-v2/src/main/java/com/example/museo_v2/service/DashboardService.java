@@ -11,6 +11,10 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Servicio encargado de calcular métricas generales para el panel de control.
+ * Obtiene información a partir de eventos, reservas y productos del inventario.
+ */
 @Service
 public class DashboardService {
 
@@ -23,22 +27,31 @@ public class DashboardService {
     @Autowired
     private ProductoInventarioRepository productoRepo;
 
+    /**
+     * Obtiene un conjunto de métricas relacionadas con la actividad del museo.
+     * <p>
+     * Métricas incluidas:
+     * <ul>
+     *     <li><b>ingresosTotales</b>: suma total generada por reservas</li>
+     *     <li><b>eventosFuturos</b>: cantidad de eventos cuya fecha de inicio es posterior a hoy</li>
+     *     <li><b>bajoStock</b>: cantidad de productos con stock disponible menor a 5</li>
+     *     <li><b>totalReservas</b>: número total de reservas registradas</li>
+     * </ul>
+     *
+     * @return un mapa con las métricas calculadas
+     */
     public Map<String, Object> obtenerMetricas() {
         Map<String, Object> metricas = new HashMap<>();
 
-        // 1. Ingresos Totales
         BigDecimal ingresos = reservaRepo.sumarIngresosTotales();
         metricas.put("ingresosTotales", ingresos);
 
-        // 2. Eventos Futuros (Próximos 30 días o total futuro)
         long eventosFuturos = eventoRepo.countByFechaInicioAfter(LocalDate.now());
         metricas.put("eventosFuturos", eventosFuturos);
 
-        // 3. Productos con Bajo Stock (Menos de 5 unidades)
         long bajoStock = productoRepo.countByStockDisponibleLessThan(5);
         metricas.put("bajoStock", bajoStock);
 
-        // 4. Total de Reservas
         long totalReservas = reservaRepo.count();
         metricas.put("totalReservas", totalReservas);
 

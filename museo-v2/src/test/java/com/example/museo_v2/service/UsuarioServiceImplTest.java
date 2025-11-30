@@ -1,7 +1,7 @@
 package com.example.museo_v2.service;
 
 import com.example.museo_v2.model.Usuario;
-import com.example.museo_v2.repository.UsuarioRepositorio; 
+import com.example.museo_v2.repository.UsuarioRepositorio;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,16 +19,18 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MockitoExtension.class) 
+/**
+ * Pruebas unitarias para {@link UsuarioServiceImpl}.
+ * Verifica la creación de usuarios y el proceso de encriptación de contraseñas.
+ */
+@ExtendWith(MockitoExtension.class)
 public class UsuarioServiceImplTest {
 
     @Mock
     private UsuarioRepositorio usuarioRepositorio;
+
     @Mock
     private PasswordEncoder passwordEncoder;
 
@@ -36,36 +38,35 @@ public class UsuarioServiceImplTest {
     private UsuarioServiceImpl usuarioService;
 
     @Captor
-    ArgumentCaptor<Usuario> usuarioArgumentCaptor;
+    private ArgumentCaptor<Usuario> usuarioArgumentCaptor;
 
+    /**
+     * Comprueba que la contraseña del usuario sea encriptada antes de
+     * ser almacenada en la base de datos.
+     */
     @Test
     void crearUsuario_DebeEncriptarClaveAntesDeGuardar() {
-        
         String clavePlana = "miClaveSecreta123";
-        String claveEncriptadaSimulada = "$2a$10$N9qo8uLOickGsS3P5l/AUec.p4.twQSC0sKsS.sY.i.i.8aHiCKyq";
+        String claveEncriptadaSimulada =
+                "$2a$10$N9qo8uLOickGsS3P5l/AUec.p4.twQSC0sKsS.sY.i.i.8aHiCKyq";
 
         Usuario usuario = new Usuario();
         usuario.setNombreUsuario("testUser");
         usuario.setNombres("Usuario de Prueba");
-        usuario.setClave(clavePlana); 
+        usuario.setClave(clavePlana);
 
         when(passwordEncoder.encode(anyString())).thenReturn(claveEncriptadaSimulada);
-
         when(usuarioRepositorio.save(any(Usuario.class))).thenReturn(usuario);
 
         Usuario usuarioGuardado = usuarioService.crearUsuario(usuario);
-
 
         verify(usuarioRepositorio, times(1)).save(usuarioArgumentCaptor.capture());
 
         Usuario usuarioCapturado = usuarioArgumentCaptor.getValue();
 
         assertNotNull(usuarioGuardado);
-
         assertEquals(claveEncriptadaSimulada, usuarioCapturado.getClave());
-
         assertNotEquals(clavePlana, usuarioCapturado.getClave());
-
         assertTrue(usuarioCapturado.getClave().startsWith("$2a$"));
     }
 }

@@ -20,6 +20,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Pruebas unitarias para {@link ProductoInventarioService}.
+ * Valida la asignación y liberación de stock al gestionar productos
+ * asociados a eventos.
+ */
 @ExtendWith(MockitoExtension.class)
 public class ProductoInventarioServiceTest {
 
@@ -32,75 +37,75 @@ public class ProductoInventarioServiceTest {
     @InjectMocks
     private ProductoInventarioService servicio;
 
+    /**
+     * Verifica que cuando hay stock suficiente, el servicio descuente la cantidad solicitada
+     * y registre la relación Evento-Producto correctamente.
+     */
     @Test
     void reservarProductos_StockSuficiente_DebeDescontarYGuardar() {
-        // DATOS DE PRUEBA
         Evento evento = new Evento();
         evento.setId(1L);
 
         ProductoInventario producto = new ProductoInventario();
         producto.setId(10L);
         producto.setNombre("Proyector");
-        producto.setStockDisponible(10); // Hay 10 disponibles
+        producto.setStockDisponible(10);
 
         Map<Long, Integer> requerimientos = new HashMap<>();
-        requerimientos.put(10L, 3); // Quiero reservar 3
+        requerimientos.put(10L, 3);
 
-        // MOCKS
         when(productoRepo.findById(10L)).thenReturn(Optional.of(producto));
 
-        // EJECUCIÓN
         servicio.reservarProductos(evento, requerimientos);
 
-        // VERIFICACIÓN
-        assertEquals(7, producto.getStockDisponible()); // 10 - 3 = 7
-        verify(productoRepo).save(producto); // Se guardó el producto actualizado
-        verify(eventoProductoRepo).save(any(EventoProducto.class)); // Se creó la relación
+        assertEquals(7, producto.getStockDisponible());
+        verify(productoRepo).save(producto);
+        verify(eventoProductoRepo).save(any(EventoProducto.class));
     }
 
+    /**
+     * Verifica que el método lance una excepción si se intenta reservar más stock del disponible.
+     */
     @Test
     void reservarProductos_StockInsuficiente_DebeLanzarExcepcion() {
-        // DATOS DE PRUEBA
         ProductoInventario producto = new ProductoInventario();
         producto.setId(20L);
-        producto.setStockDisponible(2); // Solo hay 2
+        producto.setStockDisponible(2);
 
         Map<Long, Integer> requerimientos = new HashMap<>();
-        requerimientos.put(20L, 5); // Quiero 5 (No alcanza)
+        requerimientos.put(20L, 5);
 
-        // MOCKS
         when(productoRepo.findById(20L)).thenReturn(Optional.of(producto));
 
-        // EJECUCIÓN Y VERIFICACIÓN
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            servicio.reservarProductos(new Evento(), requerimientos);
-        });
+        Exception exception = assertThrows(RuntimeException.class, () ->
+                servicio.reservarProductos(new Evento(), requerimientos)
+        );
 
-        assertEquals("Stock insuficiente para: null", exception.getMessage()); // null porque no le puse nombre al producto mock
-        verify(productoRepo, never()).save(any()); // No se debe guardar nada
+        assertEquals("Stock insuficiente para: null", exception.getMessage());
+        verify(productoRepo, never()).save(any());
     }
 
+    /**
+     * Verifica que al liberar productos, el stock se restaure y se elimine
+     * la asignación correspondiente.
+     */
     @Test
     void liberarProductos_DebeRestaurarStock() {
-        // DATOS DE PRUEBA
         Evento evento = new Evento();
-        
+
         ProductoInventario producto = new ProductoInventario();
         producto.setStockDisponible(5);
 
         EventoProducto asignacion = new EventoProducto();
         asignacion.setProducto(producto);
-        asignacion.setCantidadAsignada(3); // Este evento tenía 3 reservados
+        asignacion.setCantidadAsignada(3);
 
-        // MOCKS
         when(eventoProductoRepo.findByEvento(evento)).thenReturn(List.of(asignacion));
 
-        // EJECUCIÓN
         servicio.liberarProductos(evento);
 
-        // VERIFICACIÓN
-        assertEquals(8, producto.getStockDisponible()); // 5 + 3 = 8
-        verify(productoRepo).save(producto); // Se actualizó el stock
-        verify(eventoProductoRepo).delete(asignacion); // Se borró la asignación
+        assertEquals(8, producto.getStockDisponible());
+        verify(productoRepo).save(producto);
+        verify(eventoProductoRepo).delete(asignacion);
     }
 }

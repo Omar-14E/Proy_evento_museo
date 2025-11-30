@@ -4,22 +4,30 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Representa un producto dentro del inventario del museo.
+ * Incluye información básica como nombre, tipo y control de stock.
+ */
 @Entity
 @Table(name = "inventario_productos")
-@Getter @Setter
+@Getter
+@Setter
 public class ProductoInventario {
 
+    /** Identificador único del producto. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nombre; // Ej: Silla de Plástico, Proyector Epson
-    private String tipo;   // Ej: Mobiliario, Electrónico
+    /** Nombre descriptivo del producto (ej.: “Silla de Plástico”). */
+    private String nombre;
 
-    // Nuevo: Control de Stock
-    private Integer stockTotal;      // Ej: 100 sillas en total
-    private Integer stockDisponible; // Ej: 80 sillas disponibles actualmente
+    /** Categoría o tipo del producto (ej.: “Mobiliario”, “Electrónico”). */
+    private String tipo;
 
-    // Eliminamos 'eventoAsignado' y 'estado' simple, ya que el stock varía dinámicamente
-    // Si prefieres mantener 'estado' para saber si el producto está 'ACTIVO' o 'DESCONTINUADO', puedes dejarlo.
+    /** Cantidad total del producto en inventario. */
+    private Integer stockTotal;
+
+    /** Cantidad actualmente disponible para asignar a eventos. */
+    private Integer stockDisponible;
 }

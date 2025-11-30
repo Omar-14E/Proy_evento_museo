@@ -10,8 +10,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * Servicio encargado de la lógica de negocio relacionada con las reservas.
- * Incluye métodos para guardar reservas y calcular el total a pagar.
+ * Servicio encargado de la gestión de reservas, incluyendo el cálculo del total
+ * a pagar y la persistencia de los registros en la base de datos.
  */
 @Service
 public class ReservaService {
@@ -23,49 +23,39 @@ public class ReservaService {
     private EventoService eventoService;
 
     /**
-     * Guarda una reserva en la base de datos.
-     * Calcula el total a pagar por la reserva basándose en el número de entradas y el costo por entrada.
-     * 
-     * @param reserva La reserva que se va a guardar.
-     * @param eventoId El ID del evento al que se asocia la reserva.
-     * @return La reserva guardada con el total a pagar calculado.
-     * @throws IllegalArgumentException Si el evento no existe en la base de datos.
+     * Guarda una reserva asociada a un evento. Calcula el total a pagar
+     * según el costo por entrada y la cantidad solicitada.
+     *
+     * @param reserva   reserva a registrar
+     * @param eventoId  identificador del evento asociado
+     * @return reserva guardada con el total a pagar calculado
+     * @throws IllegalArgumentException si el evento no existe
      */
     public Reserva guardarReserva(Reserva reserva, Long eventoId) {
 
-        // Obtener el evento asociado a la reserva
         Evento evento = eventoService.obtenerEventoPorId(eventoId);
         if (evento == null) {
             throw new IllegalArgumentException("Evento no encontrado.");
         }
 
-        // Obtener el costo unitario de la entrada
         BigDecimal costoUnitario = evento.getCostoEntrada() != null
                 ? evento.getCostoEntrada()
                 : BigDecimal.ZERO;
 
-        // Obtener el número de entradas
         BigDecimal nEntradas = new BigDecimal(reserva.getNEntradas());
+        BigDecimal total = costoUnitario.multiply(nEntradas).setScale(2, RoundingMode.HALF_UP);
 
-        // Calcular el total a pagar
-        BigDecimal total = costoUnitario.multiply(nEntradas);
-
-        // Redondear el total a dos decimales
-        total = total.setScale(2, RoundingMode.HALF_UP);
-
-        // Establecer el evento y el total a pagar en la reserva
         reserva.setEvento(evento);
         reserva.setTotalPagar(total);
 
-        // Guardar la reserva y devolverla
         return reservaRepositorio.save(reserva);
     }
 
     /**
-     * Obtiene una reserva por su ID.
-     * 
-     * @param id El ID de la reserva a obtener.
-     * @return La reserva correspondiente al ID proporcionado o null si no se encuentra.
+     * Obtiene una reserva por su identificador.
+     *
+     * @param id identificador de la reserva
+     * @return la reserva encontrada o {@code null} si no existe
      */
     public Reserva obtenerReservaPorId(Long id) {
         return reservaRepositorio.findById(id).orElse(null);

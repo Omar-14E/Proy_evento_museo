@@ -140,7 +140,6 @@ public class ExcelService {
                 row.createCell(4).setCellValue(p.getStockDisponible() != null ? p.getStockDisponible() : 0);
             }
             
-            // Autoajustar columnas
             for(int i=0; i<headers.length; i++) {
                 sheet.autoSizeColumn(i);
             }
