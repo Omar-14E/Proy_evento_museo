@@ -29,4 +29,9 @@ public class HomeController {
         modelo.addAttribute("eventosProximos", eventoService.obtenerProximosEventos(6));
         return "index";
     }
+
+    @GetMapping("/403")
+    public String accesoDenegado() {
+        return "403"; // Retorna la vista templates/403.html
+    }
 }

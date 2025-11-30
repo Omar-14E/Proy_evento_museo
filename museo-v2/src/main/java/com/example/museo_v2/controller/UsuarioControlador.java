@@ -58,6 +58,12 @@ public class UsuarioControlador {
         if (result.hasErrors()) {
             return "usuarios/registro";
         }
+        
+        // Asignar rol por defecto si no viene del formulario
+        if (usuario.getRol() == null || usuario.getRol().isEmpty()) {
+            usuario.setRol("ROLE_TRABAJADOR");
+        }
+        
         usuarioService.crearUsuario(usuario);
         return "redirect:/usuarios/login";
     }

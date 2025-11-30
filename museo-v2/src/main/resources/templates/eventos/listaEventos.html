@@ -101,7 +101,9 @@
                                 Editar
                             </a>
 
-                            <form th:action="@{/eventos/eliminar/{id}(id=${evento.id})}" th:method="post"
+                            <form sec:authorize="hasRole('ADMIN')" 
+                                th:action="@{/eventos/eliminar/{id}(id=${evento.id})}" 
+                                th:method="post"
                                 style="display: inline-block;">
                                 <button type="submit" class="btn btn-sm btn-danger shadow-sm eliminar-evento-btn"
                                     th:data-evento-nombre="${evento.nombre}">
