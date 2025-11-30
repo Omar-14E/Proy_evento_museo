@@ -3,24 +3,29 @@ package com.example.museo_v2.controller;
 import com.example.museo_v2.model.Evento;
 import com.example.museo_v2.model.Reserva;
 import com.example.museo_v2.service.EventoService;
+import com.example.museo_v2.service.PdfService;
 import com.example.museo_v2.service.ReservaService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-//Imports de logback
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.ByteArrayInputStream;
 
 /**
- * Controlador para manejar las reservas de eventos en el museo.
- * Permite crear, guardar y confirmar reservas para eventos específicos.
+ * Controlador para la gestión de reservas de eventos.
+ * Incluye registro de actividad y generación de tickets en PDF.
  */
 @Controller
 @RequestMapping("/reservas")
 public class ReservaControlador {
-    //Instancia de logger
+
     private static final Logger logger = LoggerFactory.getLogger(ReservaControlador.class);
 
     @Autowired
@@ -29,27 +34,27 @@ public class ReservaControlador {
     @Autowired
     private EventoService eventoService;
 
+    @Autowired
+    private PdfService pdfService;
+
     /**
-     * Método que muestra el formulario para crear una nueva reserva.
-     * 
-     * @param eventoId El ID del evento para el cual se va a realizar la reserva.
-     * @param model El modelo que contiene los atributos necesarios para la vista.
-     * @return La vista del formulario de reserva.
+     * Muestra el formulario para crear una reserva asociada a un evento.
+     *
+     * @param eventoId ID del evento a reservar
+     * @param model modelo para enviar datos a la vista
+     * @return vista del formulario de reserva
      */
     @GetMapping("/crear/{eventoId}")
     public String mostrarFormularioReserva(@PathVariable Long eventoId, Model model) {
-
-        logger.info("Solicitando formulario de reserva para evento ID: {}", eventoId);
+        logger.info("ACCESO FORMULARIO | Solicitud de reserva para evento {}", eventoId);
 
         Evento evento = eventoService.obtenerEventoPorId(eventoId);
         if (evento == null) {
-            logger.warn("Intento de reserva fallido: Evento ID {} no encontrado.", eventoId);
+            logger.warn("EVENTO NO ENCONTRADO | ID {}", eventoId);
             return "redirect:/";
         }
 
-        Reserva reserva = new Reserva();
-
-        model.addAttribute("reserva", reserva);
+        model.addAttribute("reserva", new Reserva());
         model.addAttribute("evento", evento);
         model.addAttribute("precioUnitario", evento.getCostoEntrada());
 
@@ -57,56 +62,82 @@ public class ReservaControlador {
     }
 
     /**
-     * Método para procesar y guardar una nueva reserva.
-     * 
-     * @param eventoId El ID del evento para el cual se realiza la reserva.
-     * @param reserva El objeto reserva que se va a guardar.
-     * @return Redirige a la página de confirmación de la reserva.
+     * Procesa y guarda una reserva para un evento.
+     *
+     * @param eventoId ID del evento reservado
+     * @param reserva datos de la reserva
+     * @return redirección a la página de confirmación
      */
     @PostMapping("/guardar/{eventoId}")
     public String guardarReserva(@PathVariable Long eventoId, @ModelAttribute("reserva") Reserva reserva) {
-        logger.info("Intentando guardar reserva para evento ID: {}. Datos: {}", eventoId, reserva);
-        
+        logger.info("RESERVA EN PROCESO | Evento {} | Cliente: {}", eventoId, reserva.getNombreCompleto());
+
         try {
             Reserva reservaGuardada = reservaService.guardarReserva(reserva, eventoId);
-            logger.info("Reserva guardada exitosamente con ID: {}", reservaGuardada.getId());
+
+            logger.info("RESERVA EXITOSA | ID {} | Total S/ {} | Método {}",
+                    reservaGuardada.getId(),
+                    reservaGuardada.getTotalPagar(),
+                    reservaGuardada.getMetodoPago());
 
             return "redirect:/reservas/confirmacion/" + reservaGuardada.getId();
+
         } catch (IllegalArgumentException e) {
-            logger.error("Error al guardar la reserva para el evento ID: " + eventoId, e);
-            
+            logger.error("ERROR EN RESERVA | Evento {} | Motivo: {}", eventoId, e.getMessage());
             return "redirect:/";
         }
     }
 
     /**
-     * Método para mostrar la página de confirmación de la reserva.
-     * 
-     * @param reservaId El ID de la reserva que se desea confirmar.
-     * @param model El modelo que contiene los atributos necesarios para la vista de confirmación.
-     * @return La vista de confirmación de la reserva.
+     * Muestra la página de confirmación de una reserva.
+     *
+     * @param reservaId ID de la reserva
+     * @param model modelo con la información de la reserva
+     * @return vista de confirmación
      */
     @GetMapping("/confirmacion/{reservaId}")
     public String mostrarConfirmacion(@PathVariable Long reservaId, Model model) {
-
         Reserva reserva = reservaService.obtenerReservaPorId(reservaId);
-
         if (reserva == null) {
             return "redirect:/";
         }
 
         model.addAttribute("reserva", reserva);
-
         return "reservas/confirmacionReserva";
     }
 
     /**
-     * Redirige a la página de inicio si no se proporciona un ID de reserva para la confirmación.
-     * 
-     * @return Redirige a la página principal.
+     * Redirección predeterminada cuando no se especifica reserva.
+     *
+     * @return redirección al inicio
      */
     @GetMapping("/confirmacion")
     public String mostrarConfirmacionBase() {
         return "redirect:/";
+    }
+
+    /**
+     * Genera y descarga el ticket en PDF de una reserva.
+     *
+     * @param id ID de la reserva
+     * @return archivo PDF como respuesta
+     */
+    @GetMapping("/ticket/{id}/pdf")
+    public ResponseEntity<InputStreamResource> descargarTicket(@PathVariable Long id) {
+        Reserva reserva = reservaService.obtenerReservaPorId(id);
+
+        if (reserva == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        ByteArrayInputStream pdf = pdfService.generarTicketPdf(reserva);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ticket_museo_" + id + ".pdf");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(pdf));
     }
 }

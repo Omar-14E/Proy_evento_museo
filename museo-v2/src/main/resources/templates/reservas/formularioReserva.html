@@ -1,176 +1,126 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generar Reserva</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="icon" type="image/png" th:href="@{/images/icono.png}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400&display=swap"
-        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
     <link rel="stylesheet" th:href="@{/css/reserva.css}">
-
 </head>
 
-<body>
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-museo-brown">
-        <div class="container-fluid">
-            <a class="navbar-brand" th:href="@{/}">Museo Tumbas Reales de Sipan</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <div sec:authorize="isAuthenticated()" class="d-flex">
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" th:href="@{/}">Inicio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/eventos}">Gestión</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/salas}">Salas</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/inventario/lista}">
-                                <i class="bi bi-box-seam"></i> Inventario
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-person-fill"></i> <span sec:authentication="name"></span> </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <form th:action="@{/logout}" method="post" class="d-inline">
-                                <button type="submit" class="nav-link btn btn-link"
-                                    style="color: rgba(255,255,255,.55);">
-                                    Cerrar Sesión
-                                </button>
-                            </form>
-                        </li>
-                    </div>
-                </ul>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/}"><i class="bi bi-bank2 me-2"></i> Museo Tumbas Reales</a>
+            <div class="ms-auto">
+                <a th:href="@{/}" class="btn btn-outline-light btn-sm">Volver al Inicio</a>
             </div>
+        </div>
     </nav>
 
-    <div class="container">
-        <div class="row mt-5 justify-content-center">
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            
+            <div class="col-lg-7 mb-4">
+                <div class="card shadow border-0 rounded-3">
+                    <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                        <h3 class="color-museo fw-bold mb-0">Datos de Reserva</h3>
+                        <p class="text-muted small">Complete su información para asegurar sus entradas.</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <form th:action="@{/reservas/guardar/{id}(id=${evento.id})}" th:object="${reserva}" method="POST">
 
-            <div class="col-md-6 mb-4">
-                <h3 class="color-museo mb-4">
-                    Reservar para: <span th:text="${evento.nombre}"></span>
-                </h3>
-
-                <div class="card p-4 shadow-sm border-0">
-                    <form th:action="@{/reservas/guardar/{id}(id=${evento.id})}" th:object="${reserva}" method="POST">
-
-                        <div class="mb-3">
-                            <label for="nombreCompleto" class="form-label">Nombre Completo</label>
-                            <input type="text" class="form-control" id="nombreCompleto" th:field="*{nombreCompleto}"
-                                required>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="dniRuc" class="form-label">DNI / RUC</label>
-                                <input type="text" class="form-control" id="dniRuc" th:field="*{dniRuc}" required>
+                            <div class="mb-3">
+                                <label for="nombreCompleto" class="form-label fw-bold">Nombre Completo</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                                    <input type="text" class="form-control" id="nombreCompleto" th:field="*{nombreCompleto}" placeholder="Ej. Juan Pérez" required>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="telefono" class="form-label">Teléfono</label>
-                                <input type="tel" class="form-control" id="telefono" th:field="*{telefono}" required>
-                            </div>
-                        </div>
 
-                        <hr class="my-4">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="dniRuc" class="form-label fw-bold">DNI / RUC</label>
+                                    <input type="text" class="form-control" id="dniRuc" th:field="*{dniRuc}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="telefono" class="form-label fw-bold">Teléfono</label>
+                                    <input type="tel" class="form-control" id="telefono" th:field="*{telefono}" required>
+                                </div>
+                            </div>
 
-                        <div class="mb-3">
-                            <label for="nEntradas" class="form-label">Nº de Entradas</label>
-                            <input type="number" class="form-control" id="nEntradas" th:field="*{nEntradas}" required
-                                min="1" oninput="calcularTotal()">
-                            <div class="form-text">Costo unitario: <span id="precio-unitario" class="fw-bold"
-                                    th:text="'S/ ' + ${#numbers.formatDecimal(evento.costoEntrada, 0, 'POINT', 2, 'COMMA')}">S/
-                                    15.00</span>
-                            </div>
-                        </div>
+                            <hr class="my-4 text-muted">
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Tipo de Comprobante</label><br>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" id="boleta" th:field="*{tipoComprobante}"
-                                    value="Boleta" required>
-                                <label class="form-check-label" for="boleta">Boleta</label>
+                            <div class="mb-4">
+                                <label for="nEntradas" class="form-label fw-bold">Número de Entradas</label>
+                                <input type="number" class="form-control form-control-lg border-primary" id="nEntradas" th:field="*{nEntradas}" required min="1" value="1" oninput="calcularTotal()">
+                                <div class="form-text text-end">Precio unitario: <span class="fw-bold" th:text="'S/ ' + ${evento.costoEntrada}">S/ 0.00</span></div>
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" id="factura" th:field="*{tipoComprobante}"
-                                    value="Factura">
-                                <label class="form-check-label" for="factura">Factura</label>
-                            </div>
-                        </div>
 
-                        <div class="mb-5">
-                            <label class="form-label fw-bold">Método de Pago</label><br>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" id="efectivo" th:field="*{metodoPago}"
-                                    value="Efectivo" required>
-                                <label class="form-check-label" for="efectivo">Efectivo</label>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold d-block">Tipo de Comprobante</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="boleta" th:field="*{tipoComprobante}" value="Boleta" checked>
+                                    <label class="form-check-label" for="boleta">Boleta</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="factura" th:field="*{tipoComprobante}" value="Factura">
+                                    <label class="form-check-label" for="factura">Factura</label>
+                                </div>
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" id="tarjeta" th:field="*{metodoPago}"
-                                    value="Tarjeta">
-                                <label class="form-check-label" for="tarjeta">Tarjeta</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" id="billetera" th:field="*{metodoPago}"
-                                    value="Billetera Virtual">
-                                <label class="form-check-label" for="billetera">Billetera Virtual</label>
-                            </div>
-                        </div>
 
-                        <div class="d-flex justify-content-between pt-3">
-                            <button type="submit" class="btn btn-reservar btn-lg shadow-sm w-50 me-2">
-                                Reservar
-                            </button>
-                            <a th:href="@{/}" class="btn btn-cancelar btn-lg w-50">Cancelar</a>
-                        </div>
-                    </form>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold d-block">Método de Pago</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="metodoPago" id="efectivo" value="Efectivo" th:field="*{metodoPago}" checked>
+                                    <label class="btn btn-outline-secondary" for="efectivo"><i class="bi bi-cash me-2"></i>Efectivo</label>
+
+                                    <input type="radio" class="btn-check" name="metodoPago" id="tarjeta" value="Tarjeta" th:field="*{metodoPago}">
+                                    <label class="btn btn-outline-secondary" for="tarjeta"><i class="bi bi-credit-card me-2"></i>Tarjeta</label>
+
+                                    <input type="radio" class="btn-check" name="metodoPago" id="yape" value="Billetera Digital" th:field="*{metodoPago}">
+                                    <label class="btn btn-outline-secondary" for="yape"><i class="bi bi-phone me-2"></i>Yape/Plin</label>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-brown btn-lg py-3 shadow">
+                                    Confirmar Reserva <i class="bi bi-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="card resumen-card shadow-lg">
-                    <div class="card-body">
-                        <h4 class="color-museo border-bottom pb-2">Resumen del Evento</h4>
-                        <p><strong>Evento:</strong> <span th:text="${evento.nombre}"></span></p>
-                        <p><strong>Fecha:</strong> <span
-                                th:text="${#temporals.format(evento.fechaInicio, 'dd MMM yyyy')}"></span></p>
-                        <p><strong>Hora:</strong> <span
-                                th:text="${#temporals.format(evento.horaInicio, 'HH:mm')}"></span></p>
-                        <p><strong>Sala:</strong> <span
-                                th:text="${evento.sala != null} ? ${evento.sala.nombre} : 'N/A'"></span></p>
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 sticky-top" style="top: 90px; background-color: #fcfcfc;">
+                    <div class="card-body p-4">
+                        <h5 class="color-museo border-bottom pb-2 mb-3">Resumen de Compra</h5>
+                        
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-dark" th:text="${evento.nombre}">Evento Cultural</h6>
+                            <p class="mb-1 text-muted small"><i class="bi bi-calendar3 me-2"></i> <span th:text="${#temporals.format(evento.fechaInicio, 'dd MMM yyyy')}">Fecha</span></p>
+                            <p class="mb-1 text-muted small"><i class="bi bi-clock me-2"></i> <span th:text="${#temporals.format(evento.horaInicio, 'HH:mm')}">Hora</span></p>
+                            <p class="mb-0 text-muted small"><i class="bi bi-geo-alt me-2"></i> <span th:text="${evento.sala != null ? evento.sala.nombre : 'Por definir'}">Sala</span></p>
+                        </div>
 
-                        <hr class="mt-4 mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-secondary">Entradas</span>
+                            <span id="display-entradas" class="fw-bold">1</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-secondary">Precio Unit.</span>
+                            <span th:text="'S/ ' + ${evento.costoEntrada}">S/ 0.00</span>
+                        </div>
 
-                        <h4 class="color-museo">Cálculo de Compra</h4>
-                        <p><strong>Precio Unitario:</strong> <span id="display-precio"
-                                th:text="'S/ ' + ${#numbers.formatDecimal(evento.costoEntrada, 0, 'POINT', 2, 'COMMA')}">S/
-                                15.00</span></p>
-                        <p><strong>Nº de Entradas:</strong> <span id="display-entradas" th:text="1">1</span></p>
-
-                        <div class="text-center mt-4 p-3 bg-light rounded">
-                            <p class="mb-1 text-uppercase fw-bold">TOTAL A PAGAR:</p>
-                            <span id="total-pagar" class="total-display"
-                                th:text="'S/ ' + ${#numbers.formatDecimal(evento.costoEntrada, 0, 'POINT', 2, 'COMMA')}">S/
-                                15.00</span>
+                        <div class="alert alert-success d-flex justify-content-between align-items-center mb-0">
+                            <span class="fw-bold">TOTAL:</span>
+                            <span id="total-pagar" class="fs-4 fw-bold">S/ 0.00</span>
                         </div>
                     </div>
                 </div>
@@ -181,36 +131,24 @@
 
     <script th:inline="javascript">
         const costoUnitario = /*[[${evento.costoEntrada}]]*/ 0.0;
-
-        const displayTotal = document.getElementById('total-pagar');
         const inputEntradas = document.getElementById('nEntradas');
         const displayEntradas = document.getElementById('display-entradas');
+        const displayTotal = document.getElementById('total-pagar');
 
-        const formatter = new Intl.NumberFormat('es-PE', {
-            style: 'currency',
-            currency: 'PEN',
-            minimumFractionDigits: 2,
-        });
-
-        if (!inputEntradas.value) {
-            inputEntradas.value = 1;
-        }
+        const formatter = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' });
 
         function calcularTotal() {
-            const numEntradas = parseInt(inputEntradas.value) || 0;
-            const total = numEntradas * costoUnitario;
-
-            displayEntradas.textContent = numEntradas;
+            let cant = parseInt(inputEntradas.value) || 0;
+            if(cant < 1) cant = 1; 
+            
+            const total = cant * costoUnitario;
+            
+            displayEntradas.textContent = cant;
             displayTotal.textContent = formatter.format(total);
         }
 
+        // Ejecutar al inicio
         calcularTotal();
-        inputEntradas.addEventListener('input', calcularTotal);
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-
 </body>
-
 </html>

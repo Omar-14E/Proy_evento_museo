@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Administrativo</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+    
+    <style>
+        .card-icon { font-size: 3rem; opacity: 0.3; position: absolute; right: 20px; top: 20px; }
+        .dashboard-card { transition: transform 0.3s; border: none; }
+        .dashboard-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body>
+    
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+                <i class="bi bi-bank2 me-2"></i> Museo Tumbas Reales
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" sec:authorize="isAuthenticated()">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/}">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link active" th:href="@{/dashboard}">Dashboard</a></li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Administración</a>
+                        <ul class="dropdown-menu shadow">
+                            <li><a class="dropdown-item" th:href="@{/eventos}"><i class="bi bi-calendar-event me-2"></i>Eventos</a></li>
+                            <li><a class="dropdown-item" th:href="@{/salas}"><i class="bi bi-columns-gap me-2"></i>Salas</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/inventario/lista}"><i class="bi bi-box-seam me-2"></i>Inventario</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav ms-auto align-items-center" sec:authorize="isAuthenticated()">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <div class="bg-white text-dark rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 32px; height: 32px;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <span sec:authentication="name" class="fw-bold">Usuario</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><form th:action="@{/logout}" method="post" class="px-2"><button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión</button></form></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 mb-5">
+        <h2 class="mb-4 color-museo fw-bold">Panel de Control y Estadísticas</h2>
+
+        <div class="row g-4">
+            
+            <div class="col-md-3">
+                <div class="card dashboard-card bg-success text-white shadow h-100">
+                    <div class="card-body position-relative">
+                        <h5 class="card-title">Ingresos Totales</h5>
+                        <h2 class="display-6 fw-bold" 
+                            th:text="'S/ ' + ${#numbers.formatDecimal(ingresosTotales, 0, 'POINT', 2, 'COMMA')}">
+                            S/ 0.00
+                        </h2>
+                        <i class="bi bi-cash-coin card-icon"></i>
+                        <p class="card-text small mt-3">Recaudado en reservas</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card dashboard-card bg-primary text-white shadow h-100">
+                    <div class="card-body position-relative">
+                        <h5 class="card-title">Próximos Eventos</h5>
+                        <h2 class="display-4 fw-bold" th:text="${eventosFuturos}">0</h2>
+                        <i class="bi bi-calendar-event card-icon"></i>
+                        <p class="card-text small mt-3">Programados a futuro</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card dashboard-card text-white shadow h-100" 
+                     th:classappend="${bajoStock > 0 ? 'bg-danger' : 'bg-secondary'}">
+                    <div class="card-body position-relative">
+                        <h5 class="card-title">Stock Bajo</h5>
+                        <h2 class="display-4 fw-bold" th:text="${bajoStock}">0</h2>
+                        <i class="bi bi-box-seam-fill card-icon"></i>
+                        <p class="card-text small mt-3">Productos con < 5 unidades</p>
+                        <a th:if="${bajoStock > 0}" th:href="@{/inventario/lista}" class="text-white stretched-link">Ver inventario</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card dashboard-card bg-info text-white shadow h-100">
+                    <div class="card-body position-relative">
+                        <h5 class="card-title">Reservas Totales</h5>
+                        <h2 class="display-4 fw-bold" th:text="${totalReservas}">0</h2>
+                        <i class="bi bi-ticket-perforated-fill card-icon"></i>
+                        <p class="card-text small mt-3">Transacciones realizadas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="color-museo mb-3">Accesos Rápidos</h5>
+                        <div class="d-grid gap-2 d-md-block">
+                            <a th:href="@{/eventos/nuevo}" class="btn btn-outline-primary shadow-sm me-2">
+                                <i class="bi bi-plus-circle me-1"></i> Nuevo Evento
+                            </a>
+                            <a th:href="@{/inventario/nuevo}" class="btn btn-outline-success shadow-sm me-2">
+                                <i class="bi bi-box-seam me-1"></i> Nuevo Producto
+                            </a>
+                            <a th:href="@{/eventos/exportar/excel}" class="btn btn-outline-dark shadow-sm">
+                                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Reporte Eventos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5>Museo Tumbas Reales</h5>
+                    <p>Preservando la riqueza histórica de la cultura Mochica.</p>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5>Enlaces</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/">Inicio</a></li>
+                        <li><a href="/dashboard">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <h5>Contacto</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-geo-alt-fill me-2"></i> Lambayeque, Perú</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <div class="container">
+                © 2025 Museo Tumbas Reales de Sipán.
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

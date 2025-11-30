@@ -7,8 +7,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Controlador para manejar la página de inicio del museo.
- * Se encarga de cargar los eventos actuales y próximos para mostrarlos en la vista principal.
+ * Controlador para la página de inicio del museo.
+ * Carga y muestra eventos del mes y próximos eventos.
  */
 @Controller
 public class HomeController {
@@ -17,11 +17,10 @@ public class HomeController {
     private EventoService eventoService;
 
     /**
-     * Método que maneja la solicitud de la página de inicio.
-     * Carga los eventos del mes actual y los próximos eventos para ser mostrados en la vista.
-     * 
-     * @param modelo El modelo que contiene los atributos necesarios para la vista.
-     * @return La vista principal del museo (index).
+     * Muestra la página principal con los eventos relevantes.
+     *
+     * @param modelo modelo para enviar datos a la vista
+     * @return nombre de la vista principal
      */
     @GetMapping("/")
     public String home(Model modelo) {
@@ -30,8 +29,13 @@ public class HomeController {
         return "index";
     }
 
+    /**
+     * Muestra la vista de acceso denegado (Error 403).
+     *
+     * @return nombre de la vista 403
+     */
     @GetMapping("/403")
     public String accesoDenegado() {
-        return "403"; // Retorna la vista templates/403.html
+        return "403";
     }
 }

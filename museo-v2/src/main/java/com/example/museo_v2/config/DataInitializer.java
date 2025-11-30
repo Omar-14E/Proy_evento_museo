@@ -8,6 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * Inicializa datos esenciales al arrancar la aplicación,
+ * creando el usuario administrador por defecto si no existe.
+ */
 @Configuration
 public class DataInitializer {
 
@@ -17,17 +21,22 @@ public class DataInitializer {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Crea un {@link CommandLineRunner} que registra un usuario administrador
+     * inicial en caso de no existir.
+     *
+     * @return instancia de CommandLineRunner para inicializar datos
+     */
     @Bean
     public CommandLineRunner initData() {
         return args -> {
-            // Verificamos si existe el usuario admin, si no, lo creamos
             if (usuarioRepositorio.findByNombreUsuario("admin").isEmpty()) {
                 Usuario admin = new Usuario();
                 admin.setNombres("Administrador Principal");
                 admin.setNombreUsuario("admin");
-                admin.setClave(passwordEncoder.encode("admin123")); // Contraseña inicial
-                admin.setRol("ROLE_ADMIN"); // Rol Maestro
-                
+                admin.setClave(passwordEncoder.encode("admin123"));
+                admin.setRol("ROLE_ADMIN");
+
                 usuarioRepositorio.save(admin);
                 System.out.println(">>> USUARIO ADMIN CREADO: admin / admin123");
             }

@@ -10,9 +10,77 @@
     <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-museo-brown">
-        <div class="container-fluid">
-            <a class="navbar-brand" th:href="@{/}">Museo Tumbas Reales de Sipan</a>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+                <i class="bi bi-bank2 me-2"></i> Museo Tumbas Reales
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" sec:authorize="isAuthenticated()">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Administración
+                        </a>
+                        <ul class="dropdown-menu animate slideIn" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" th:href="@{/eventos}"><i
+                                        class="bi bi-calendar-event me-2"></i>Eventos</a></li>
+                            <li><a class="dropdown-item" th:href="@{/salas}"><i
+                                        class="bi bi-columns-gap me-2"></i>Salas</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" th:href="@{/inventario/lista}"><i
+                                        class="bi bi-box-seam me-2"></i>Inventario</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav ms-auto align-items-center" sec:authorize="isAuthenticated()">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="bg-white text-dark rounded-circle d-flex justify-content-center align-items-center me-2"
+                                style="width: 32px; height: 32px;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <span sec:authentication="name" class="fw-bold">Usuario</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                            <li>
+                                <span class="dropdown-item-text text-muted small">
+                                    Rol:
+                                    <span sec:authorize="hasRole('ADMIN')">Administrador</span>
+                                    <span sec:authorize="hasRole('TRABAJADOR')">Trabajador</span>
+                                </span>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form th:action="@{/logout}" method="post" class="px-2">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                                        <i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
     <div class="container mt-5">

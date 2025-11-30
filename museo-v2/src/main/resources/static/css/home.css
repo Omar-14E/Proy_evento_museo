@@ -1,25 +1,73 @@
-body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f8f7f4;
+:root {
+    --museo-primary: #6d4c41;       /* Tu color marrón principal */
+    --museo-dark: #4e342e;          /* Marrón más oscuro para hover */
+    --museo-light: #f8f7f4;         /* Fondo crema suave */
+    --text-main: #333333;
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08); /* Sombra elegante */
 }
 
-h1,
-h2,
-h3,
-h4,
-h5 {
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--museo-light);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Para que el footer siempre quede abajo */
+}
+
+/* --- Tipografía --- */
+h1, h2, h3, h4, h5, .navbar-brand {
     font-family: 'Playfair Display', serif;
-    color: #333;
 }
 
 .color-museo {
-    color: #6d4c41 !important;
+    color: var(--museo-primary) !important;
 }
 
 .bg-museo-brown {
-    background-color: #6d4c41 !important;
+    background-color: var(--museo-primary) !important;
 }
 
+/* --- NAVBAR PROFESIONAL (Mejorado) --- */
+.navbar {
+    background-color: var(--museo-primary) !important;
+    box-shadow: var(--shadow-soft);
+    padding: 0.8rem 1rem;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.5px;
+}
+
+.nav-link {
+    font-weight: 500;
+    margin: 0 5px;
+    transition: all 0.3s ease;
+    opacity: 0.9;
+}
+
+.nav-link:hover, .nav-link.active {
+    opacity: 1;
+    transform: translateY(-1px);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: var(--shadow-soft);
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.dropdown-item:hover {
+    background-color: var(--museo-light);
+    color: var(--museo-primary);
+    font-weight: 500;
+}
+
+/* --- HERO SECTION (Restaurado tu original) --- */
 .hero-section {
     background-image: url('/images/museoImg.jpg');
     background-size: cover;
@@ -29,6 +77,8 @@ h5 {
     align-items: center;
     justify-content: center;
     position: relative;
+    /* Añadí margen inferior para que no se pegue al contenido */
+    margin-bottom: 2rem; 
 }
 
 .hero-section::before {
@@ -44,34 +94,94 @@ h5 {
 .hero-content {
     z-index: 10;
     text-align: center;
+    color: white; /* Aseguramos que el texto sea blanco sobre la imagen oscura */
+}
+
+/* --- BOTONES --- */
+.btn-brown {
+    background-color: var(--museo-primary);
+    border-color: var(--museo-primary);
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.btn-brown:hover {
+    background-color: var(--museo-dark);
+    border-color: var(--museo-dark);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(109, 76, 65, 0.3);
+}
+
+/* --- TARJETAS (CARDS) --- */
+.card {
+    border: none;
+    border-radius: 12px;
+    background: white;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden; 
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-soft) !important;
 }
 
 .card-img-top {
     height: 220px;
     object-fit: cover;
-    border-top: 3px solid #6d4c41;
+    border-top: none; /* Quitamos el borde tosco */
 }
 
-.card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: none;
+/* --- FOOTER (Pie de página) --- */
+footer {
+    margin-top: auto; 
+    background-color: #3e2723; /* Marrón café oscuro elegante */
+    color: #d7ccc8; /* Texto color crema suave */
+    padding-top: 3rem;
+    font-size: 0.95rem;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.1); /* Sombra sutil hacia arriba */
 }
 
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+footer h5 {
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #6d4c41; /* Línea decorativa */
+    display: inline-block;
+    padding-bottom: 5px;
 }
 
-.btn-brown {
-    background-color: #6d4c41;
-    border-color: #6d4c41;
-    color: white;
+footer a {
+    color: #d7ccc8;
+    text-decoration: none;
     transition: all 0.3s ease;
 }
 
-.btn-brown:hover {
-    background-color: #4e342e;
-    border-color: #4e342e;
-    color: white;
-    transform: translateY(-2px);
+footer a:hover {
+    color: #ffffff;
+    padding-left: 5px; /* Pequeño movimiento al pasar el mouse */
+}
+
+footer ul li {
+    margin-bottom: 0.8rem;
+}
+
+footer i {
+    color: #8d6e63; /* Color de los íconos */
+}
+
+.footer-bottom {
+    background-color: #281a17; /* Marrón casi negro para la barra inferior */
+    padding: 1.5rem 0;
+    margin-top: 2rem;
+    font-size: 0.85rem;
+    color: #8d6e63;
+    border-top: 1px solid #4e342e;
 }

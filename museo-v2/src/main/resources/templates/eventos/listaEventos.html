@@ -4,140 +4,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Eventos del Museo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="icon" type="image/png" th:href="@{/images/icono.png}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400&display=swap"
-        rel="stylesheet">
+    <title>Gestión de Eventos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
     <link rel="stylesheet" th:href="@{/css/gestion.css}">
-
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-museo-brown">
-        <div class="container-fluid">
-            <a class="navbar-brand" th:href="@{/}">Museo Tumbas Reales de Sipan</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+                <i class="bi bi-bank2 me-2"></i> Museo Tumbas Reales
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <div sec:authorize="isAuthenticated()" class="d-flex">
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" th:href="@{/}">Inicio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/eventos}">Gestión</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/salas}">Salas</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/inventario/lista}">
-                                <i class="bi bi-box-seam"></i> Inventario
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-person-fill"></i> <span sec:authentication="name"></span> </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <form th:action="@{/logout}" method="post" class="d-inline">
-                                <button type="submit" class="nav-link btn btn-link"
-                                    style="color: rgba(255,255,255,.55);">
-                                    Cerrar Sesión
-                                </button>
-                            </form>
-                        </li>
-                    </div>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" sec:authorize="isAuthenticated()">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/}">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">Administración</a>
+                        <ul class="dropdown-menu shadow">
+                            <li><a class="dropdown-item" th:href="@{/eventos}"><i class="bi bi-calendar-event me-2"></i>Eventos</a></li>
+                            <li><a class="dropdown-item" th:href="@{/salas}"><i class="bi bi-columns-gap me-2"></i>Salas</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/inventario/lista}"><i class="bi bi-box-seam me-2"></i>Inventario</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto align-items-center" sec:authorize="isAuthenticated()">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <div class="bg-white text-dark rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 32px; height: 32px;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <span sec:authentication="name" class="fw-bold">Usuario</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><form th:action="@{/logout}" method="post" class="px-2"><button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión</button></form></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
+        </div>
     </nav>
 
-    <div class="container mt-5">
-        <h1 class="color-museo mb-4">Gestión de Eventos</h1>
-
-        <div class="d-flex justify-content-end mb-4">
-            <a th:href="@{/eventos/nuevo}" class="btn btn-brown btn-lg shadow-sm">
-                Registrar Nuevo Evento
-            </a>
-
-            <a th:href="@{/eventos/exportar/excel}" class="btn btn-success btn-lg shadow-sm" style="margin-left: 10px;">
-                Descargar Reporte en Excel
-            </a>
+    <div class="container mt-5 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="color-museo fw-bold">Gestión de Eventos</h2>
+            <div>
+                <a th:href="@{/eventos/exportar/excel}" class="btn btn-success me-2 shadow-sm">
+                    <i class="bi bi-file-earmark-excel"></i> Excel
+                </a>
+                <a th:href="@{/eventos/nuevo}" class="btn btn-brown shadow-sm">
+                    <i class="bi bi-plus-lg"></i> Nuevo Evento
+                </a>
+            </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-striped table-hover shadow-sm">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Fecha Inicio</th>
-                        <th>Hora Inicio</th>
-                        <th>Sala</th>
-                        <th>Costo (S/)</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="evento : ${eventos}">
-                        <td th:text="${evento.id}"></td>
-                        <td th:text="${evento.nombre}"></td>
-                        <td th:text="${#temporals.format(evento.fechaInicio, 'dd-MM-yyyy')}"></td>
-                        <td th:text="${#temporals.format(evento.horaInicio, 'HH:mm')}"></td>
-                        <td th:text="${evento.sala != null} ? ${evento.sala.nombre} : 'N/A'"></td>
-                        <td th:text="${#numbers.formatDecimal(evento.costoEntrada, 0, 'POINT', 2, 'COMMA')}"></td>
-                        <td>
-                            <a th:href="@{/eventos/editar/{id}(id=${evento.id})}" class="btn btn-sm btn-info shadow-sm">
-                                Editar
-                            </a>
-
-                            <form sec:authorize="hasRole('ADMIN')" 
-                                th:action="@{/eventos/eliminar/{id}(id=${evento.id})}" 
-                                th:method="post"
-                                style="display: inline-block;">
-                                <button type="submit" class="btn btn-sm btn-danger shadow-sm eliminar-evento-btn"
-                                    th:data-evento-nombre="${evento.nombre}">
-                                    Eliminar
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Evento</th>
+                                <th>Fecha y Hora</th>
+                                <th>Ubicación</th>
+                                <th>Entrada</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="evento : ${eventos}">
+                                <td class="ps-4">
+                                    <strong th:text="${evento.nombre}" class="text-dark">Nombre</strong>
+                                </td>
+                                <td>
+                                    <span th:text="${#temporals.format(evento.fechaInicio, 'dd MMM yyyy')}">Fecha</span> <br>
+                                    <small class="text-muted" th:text="${#temporals.format(evento.horaInicio, 'HH:mm')}">Hora</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${evento.sala != null} ? ${evento.sala.nombre} : 'Sin Sala'">Sala</span>
+                                </td>
+                                <td class="fw-bold text-success" th:text="'S/ ' + ${#numbers.formatDecimal(evento.costoEntrada, 0, 'POINT', 2, 'COMMA')}">Precio</td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <a th:href="@{/eventos/editar/{id}(id=${evento.id})}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form sec:authorize="hasRole('ADMIN')" th:action="@{/eventos/eliminar/{id}(id=${evento.id})}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar evento?')" title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-
-        <p th:if="${eventos.isEmpty()}" class="mt-5 alert alert-info text-center p-4">
-            No hay eventos registrados en el calendario.
-        </p>
+        
+        <div th:if="${eventos.isEmpty()}" class="alert alert-info text-center mt-4 shadow-sm border-0">
+            <i class="bi bi-info-circle me-2"></i> No hay eventos registrados en el calendario.
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+    <footer class="mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5>Museo Tumbas Reales</h5>
+                    <p>
+                        Preservando la riqueza histórica de la cultura Mochica. Un espacio de encuentro con nuestro
+                        pasado milenario y patrimonio nacional.
+                    </p>
+                </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.eliminar-evento-btn').forEach(function (button) {
-                button.addEventListener('click', function (e) {
-                    const nombre = this.getAttribute('data-evento-nombre');
-                    const mensaje = '¿Estás seguro de eliminar el evento "' + nombre + '"? Esta acción no se puede deshacer.';
-                    if (!confirm(mensaje)) {
-                        e.preventDefault();
-                    }
-                });
-            });
-        });
-    </script>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5>Enlaces Rápidos</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/"><i class="bi bi-chevron-right small me-2"></i>Inicio</a></li>
+                        <li><a href="/eventos"><i class="bi bi-chevron-right small me-2"></i>Cartelera de Eventos</a>
+                        </li>
+                        <li><a href="/salas"><i class="bi bi-chevron-right small me-2"></i>Nuestras Salas</a></li>
+                        <li><a href="/dashboard"><i class="bi bi-chevron-right small me-2"></i>Intranet</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <h5>Visítanos</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-geo-alt-fill me-2"></i> Av. Universidad Tecnologica del Perú</li>
+                        <li><i class="bi bi-envelope-fill me-2"></i> contacto@museo.pe</li>
+                        <li><i class="bi bi-telephone-fill me-2"></i> (074) 283948</li>
+                        <li><i class="bi bi-clock-fill me-2"></i> Lun - Dom: 9:00 am - 5:00 pm</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom text-center">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-md-start">
+                        © 2025 Museo Tumbas Reales de Sipán.
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="#" class="me-3">Privacidad</a>
+                        <a href="#">Términos</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

@@ -31,4 +31,6 @@ public interface EventoRepositorio extends JpaRepository<Evento, Long> {
      * @return Una lista de eventos futuros ordenados por fecha de inicio.
      */
     List<Evento> findByFechaInicioAfterOrderByFechaInicioAsc(LocalDate date);
+
+    long countByFechaInicioAfter(LocalDate fecha);
 }

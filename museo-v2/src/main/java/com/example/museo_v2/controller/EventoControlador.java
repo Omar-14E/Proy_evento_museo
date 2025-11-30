@@ -1,42 +1,46 @@
 package com.example.museo_v2.controller;
 
-
 import com.example.museo_v2.model.Evento;
-
 import com.example.museo_v2.service.EventoService;
 import com.example.museo_v2.service.ExcelService;
 import com.example.museo_v2.service.ProductoInventarioService;
 import com.example.museo_v2.service.SalaService;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.core.io.Resource;
-import java.util.List; 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-// Imports necesarios de Guava
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 /**
- * Controlador que maneja las operaciones relacionadas con los eventos del museo.
- * Permite listar, agregar, editar y eliminar eventos.
+ * Controlador para la gestión de eventos del museo.
+ * Maneja operaciones de creación, edición, eliminación, inventario
+ * y exportación de reportes.
  */
 @Controller
 @RequestMapping("/eventos")
 public class EventoControlador {
+
+    private static final Logger logger = LoggerFactory.getLogger(EventoControlador.class);
 
     @Autowired
     private EventoService eventoService;
 
     @Autowired
     private SalaService salaService;
-    
+
     @Autowired
     private ExcelService excelService;
 
@@ -44,10 +48,10 @@ public class EventoControlador {
     private ProductoInventarioService productoInventarioService;
 
     /**
-     * Método para listar todos los eventos registrados en el museo.
-     * 
-     * @param modelo El modelo que contiene los atributos necesarios para la vista.
-     * @return La vista de la lista de eventos.
+     * Muestra la lista de eventos registrados.
+     *
+     * @param modelo modelo para enviar datos a la vista
+     * @return vista de lista de eventos
      */
     @GetMapping
     public String listarEventos(Model modelo) {
@@ -56,10 +60,10 @@ public class EventoControlador {
     }
 
     /**
-     * Método que muestra el formulario para registrar un nuevo evento.
-     * 
-     * @param modelo El modelo que contiene los atributos necesarios para el formulario.
-     * @return La vista del formulario para registrar un evento.
+     * Muestra el formulario para registrar un nuevo evento.
+     *
+     * @param modelo modelo con datos iniciales para la vista
+     * @return vista del formulario
      */
     @GetMapping("/nuevo")
     public String mostrarFormularioRegistro(Model modelo) {
@@ -70,98 +74,118 @@ public class EventoControlador {
     }
 
     /**
-     * Método para guardar un nuevo evento en la base de datos.
-     * 
-     * @param evento El evento que se va a guardar.
-     * @return Redirige a la lista de eventos después de guardar el evento.
+     * Guarda un evento y procesa la reserva de productos en inventario.
+     *
+     * @param evento       datos del evento a guardar
+     * @param productoIds  IDs de productos seleccionados
+     * @param cantidades   cantidades requeridas de cada producto
+     * @param modelo       modelo para mostrar errores en la vista
+     * @return redirección o vista del formulario en caso de error
      */
     @PostMapping("/guardar")
     public String guardarEvento(@ModelAttribute Evento evento,
-                                @RequestParam(required=false) List<Long> productoIds) {
-        Preconditions.checkNotNull(evento, "El objeto Evento no puede ser nulo");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(evento.getNombre()), "El nombre del evento no puede estar vacío");
-        Preconditions.checkNotNull(evento.getSala(), "El evento debe tener una sala asignada");
-        eventoService.guardarEvento(evento);
+                                @RequestParam(required = false) List<Long> productoIds,
+                                @RequestParam(required = false) List<Integer> cantidades,
+                                Model modelo) {
 
-        if (productoIds != null && !productoIds.isEmpty()) {
-            productoInventarioService.asignarAEvento(productoIds, evento);
+        try {
+            Preconditions.checkNotNull(evento, "El evento no puede ser nulo");
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(evento.getNombre()), "El nombre no puede estar vacío");
+            Preconditions.checkNotNull(evento.getSala(), "Debe asignarse una sala");
+
+            Evento eventoGuardado = eventoService.guardarEvento(evento);
+
+            logger.info("EVENTO GUARDADO | ID: {} | Nombre: {} | Sala: {}",
+                    eventoGuardado.getId(),
+                    eventoGuardado.getNombre(),
+                    eventoGuardado.getSala().getNombre());
+
+            if (productoIds != null && cantidades != null && !productoIds.isEmpty()) {
+                Map<Long, Integer> requerimientos = new HashMap<>();
+
+                for (int i = 0; i < productoIds.size(); i++) {
+                    if (i < cantidades.size() && cantidades.get(i) != null && cantidades.get(i) > 0) {
+                        requerimientos.put(productoIds.get(i), cantidades.get(i));
+                    }
+                }
+
+                if (!requerimientos.isEmpty()) {
+                    productoInventarioService.reservarProductos(eventoGuardado, requerimientos);
+                    logger.info("INVENTARIO RESERVADO | Evento: {} | Items: {}", 
+                                eventoGuardado.getNombre(), requerimientos.size());
+                }
+            }
+
+            return "redirect:/eventos";
+
+        } catch (RuntimeException e) {
+            logger.warn("ERROR AL GUARDAR EVENTO: {}", e.getMessage());
+
+            modelo.addAttribute("error", e.getMessage());
+            modelo.addAttribute("evento", evento);
+            modelo.addAttribute("salas", salaService.listarSalasDisponibles());
+            modelo.addAttribute("productosDisponibles", productoInventarioService.productosDisponibles());
+
+            return "eventos/formularioEvento";
         }
-        return "redirect:/eventos";
     }
 
-
     /**
-     * Método que muestra el formulario para editar un evento existente.
-     * 
-     * @param id El ID del evento que se desea editar.
-     * @param modelo El modelo que contiene los atributos necesarios para el formulario de edición.
-     * @return La vista del formulario de edición de un evento.
-     * @throws IllegalArgumentException Si el ID del evento no es válido.
+     * Muestra el formulario para editar un evento existente.
+     *
+     * @param id     identificador del evento
+     * @param modelo modelo con datos del evento
+     * @return vista del formulario
      */
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEdicion(@PathVariable Long id, Model modelo) {
         Evento evento = eventoService.obtenerEventoPorId(id);
-        if (evento == null) throw new IllegalArgumentException("ID de Evento no válido: " + id);
+        if (evento == null) throw new IllegalArgumentException("ID inválido: " + id);
 
         modelo.addAttribute("evento", evento);
         modelo.addAttribute("salas", salaService.listarSalasDisponibles());
         modelo.addAttribute("productosDisponibles", productoInventarioService.productosDisponibles());
-        modelo.addAttribute("productosAsignados", productoInventarioService.productosPorEvento(evento));
         return "eventos/formularioEvento";
     }
 
-
     /**
-     * Método para eliminar un evento existente.
-     * 
-     * @param id El ID del evento que se desea eliminar.
-     * @return Redirige a la lista de eventos después de eliminar el evento.
+     * Elimina un evento y libera el stock de productos reservados.
+     *
+     * @param id identificador del evento
+     * @return redirección a la lista de eventos
      */
     @PostMapping("/eliminar/{id}")
     public String eliminarEvento(@PathVariable Long id) {
         Evento evento = eventoService.obtenerEventoPorId(id);
+
         if (evento != null) {
-            productoInventarioService.liberarProductosDeEvento(evento);
+            productoInventarioService.liberarProductos(evento);
+            logger.info("STOCK RESTAURADO | Evento ID: {}", id);
+
             eventoService.eliminarEvento(id);
+            logger.info("EVENTO ELIMINADO | ID: {}", id);
         }
+
         return "redirect:/eventos";
     }
 
-    
     /**
-     * Maneja la solicitud GET para exportar la lista completa de eventos a un archivo Excel.
+     * Exporta la lista de eventos a un archivo Excel.
      *
-     * <p>Este endpoint recupera todos los eventos, utiliza {@code excelService} para
-     * generar un archivo Excel (XLSX) en memoria y lo devuelve como un
-     * {@link ResponseEntity} que el navegador interpretará como una descarga de archivo.</p>
-     *
-     * @return Un {@link ResponseEntity} que contiene el archivo Excel como un
-     * {@link Resource}. La respuesta incluye las cabeceras HTTP (Content-Disposition)
-     * para forzar la descarga con el nombre "reporte_eventos.xlsx".
+     * @return archivo Excel como recurso descargable
      */
     @GetMapping("/exportar/excel")
     public ResponseEntity<Resource> exportarEventosExcel() {
-
-        // 1. Obtener los datos
         List<Evento> eventos = eventoService.listarTodosLosEventos();
-
-        // 2. Generar el archivo Excel en memoria
         ByteArrayInputStream excelFile = excelService.crearExcelDeEventos(eventos);
 
-        // 3. Configurar las cabeceras HTTP para la descarga
         HttpHeaders headers = new HttpHeaders();
-        String filename = "reporte_eventos.xlsx";
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_eventos.xlsx");
 
-        // 4. Envolver el stream en un recurso de Spring
-        InputStreamResource resource = new InputStreamResource(excelFile);
-
-        // 5. Construir y devolver la respuesta HTTP
         return ResponseEntity.ok()
                 .headers(headers)
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(resource);
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(new InputStreamResource(excelFile));
     }
-
-    
 }

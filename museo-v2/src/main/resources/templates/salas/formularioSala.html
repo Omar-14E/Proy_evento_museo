@@ -5,119 +5,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${sala.id == null} ? 'Registrar Nueva Sala' : 'Editar Sala'"></title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="icon" type="image/png" th:href="@{/images/icono.png}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400&display=swap"
-        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
     <link rel="stylesheet" th:href="@{/css/formularioSala.css}">
-
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-museo-brown">
-        <div class="container-fluid">
-            <a class="navbar-brand" th:href="@{/}">Museo Tumbas Reales de Sipan</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+                <i class="bi bi-bank2 me-2"></i> Museo Tumbas Reales
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <div sec:authorize="isAuthenticated()" class="d-flex">
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" th:href="@{/}">Inicio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/eventos}">Gestión</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/salas}">Salas</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/inventario/lista}">
-                                <i class="bi bi-box-seam"></i> Inventario
-                            </a>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-person-fill"></i> <span sec:authentication="name"></span> </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <form th:action="@{/logout}" method="post" class="d-inline">
-                                <button type="submit" class="nav-link btn btn-link"
-                                    style="color: rgba(255,255,255,.55);">
-                                    Cerrar Sesión
-                                </button>
-                            </form>
-                        </li>
-                    </div>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" sec:authorize="isAuthenticated()">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/}">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">Administración</a>
+                        <ul class="dropdown-menu shadow">
+                            <li><a class="dropdown-item" th:href="@{/eventos}">Eventos</a></li>
+                            <li><a class="dropdown-item" th:href="@{/salas}">Salas</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/inventario/lista}">Inventario</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto align-items-center" sec:authorize="isAuthenticated()">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <div class="bg-white text-dark rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 32px; height: 32px;"><i class="bi bi-person-fill"></i></div>
+                            <span sec:authentication="name" class="fw-bold">Usuario</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><form th:action="@{/logout}" method="post" class="px-2"><button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión</button></form></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
+        </div>
     </nav>
 
-    <div class="container mt-5">
-        <h2 class="color-museo mb-4 text-center"
+    <div class="container mt-5 mb-5">
+        <h2 class="color-museo mb-4 text-center fw-bold"
             th:text="${sala.id == null} ? 'Registrar Nueva Sala' : 'Editar Sala: ' + ${sala.nombre}">
         </h2>
         
         <div class="row justify-content-center">
             <div class="col-lg-7 col-md-9">
 
-                <div class="card p-4 shadow-lg border-0">
+                <div class="card p-4 shadow-lg border-0 rounded-4">
                     <form th:action="@{/salas/guardar}" th:object="${sala}" method="post" enctype="multipart/form-data">
 
                         <input type="hidden" th:field="*{id}" />
 
                         <div class="mb-3">
-                            <label for="nombre" class="form-label">Nombre de la Sala</label>
-                            <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+                            <label for="nombre" class="form-label fw-bold">Nombre de la Sala</label>
+                            <input type="text" class="form-control" id="nombre" th:field="*{nombre}" placeholder="Ej. Sala de Oro" required>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="capacidad" class="form-label">Capacidad (personas)</label>
-                                <input type="number" class="form-control" id="capacidad" th:field="*{capacidad}" required
-                                    min="1">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="capacidad" class="form-label fw-bold">Capacidad</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="capacidad" th:field="*{capacidad}" required min="1">
+                                    <span class="input-group-text">Pers.</span>
+                                </div>
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="ubicacion" class="form-label">Ubicación / Código de Sala</label>
-                                <input type="text" class="form-control" id="ubicacion" th:field="*{ubicacion}">
+                            <div class="col-md-6">
+                                <label for="ubicacion" class="form-label fw-bold">Ubicación</label>
+                                <input type="text" class="form-control" id="ubicacion" th:field="*{ubicacion}" placeholder="Ej. Piso 2, Pabellón A">
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="descripcion" class="form-label">Descripción Detallada</label>
-                            <textarea class="form-control" id="descripcion" th:field="*{descripcion}" rows="3"></textarea>
+                            <label for="descripcion" class="form-label fw-bold">Descripción Detallada</label>
+                            <textarea class="form-control" id="descripcion" th:field="*{descripcion}" rows="3" placeholder="Breve historia o contenido de la sala..."></textarea>
                         </div>
                         
-                        <hr class="my-4">
+                        <h5 class="color-museo border-bottom pb-2 mb-3 mt-4"><i class="bi bi-image me-2"></i>Imagen de Sala</h5>
 
                         <div class="mb-3">
-                            <label for="file" class="form-label">Imagen de la Sala (PNG/JPG)</label>
+                            <label for="file" class="form-label">Subir Imagen (PNG/JPG)</label>
                             <input type="file" class="form-control" id="file" name="file" accept="image/png, image/jpeg">
-                            <small class="form-text text-muted">Deja en blanco para mantener la imagen actual.</small>
+                            <div class="form-text">Se recomienda una imagen horizontal de alta calidad.</div>
                         </div>
 
-                        <div th:if="${sala.imagenUrl != null and !sala.imagenUrl.isEmpty()}" class="mb-4">
-                            <p class="mb-2">**Imagen actual:**</p>
-                            <img th:src="@{${sala.imagenUrl}}" alt="Imagen actual de la sala"
-                                style="max-width: 250px; height: auto; border: 1px solid #ddd; border-radius: 5px;">
+                        <div th:if="${sala.imagenUrl != null and !sala.imagenUrl.isEmpty()}" class="mb-4 text-center p-3 bg-light rounded border">
+                            <p class="mb-2 fw-bold small text-muted">Imagen actual:</p>
+                            <img th:src="@{${sala.imagenUrl}}" alt="Vista previa" class="img-fluid rounded shadow-sm" style="max-height: 200px;">
                             <input type="hidden" th:field="*{imagenUrl}" />
                         </div>
                         
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4 pt-3">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4 pt-3 border-top">
                             <button type="submit" class="btn btn-brown btn-lg px-5 shadow-sm">
-                                <span th:text="${sala.id == null} ? 'Registrar Sala' : 'Guardar Cambios'"></span>
+                                <i class="bi bi-save me-2"></i><span th:text="${sala.id == null} ? 'Registrar Sala' : 'Guardar Cambios'"></span>
                             </button>
-                            <a th:href="@{/salas}" class="btn btn-secondary btn-lg px-5">Cancelar</a>
+                            <a th:href="@{/salas}" class="btn btn-outline-secondary btn-lg px-5">Cancelar</a>
                         </div>
                     </form>
                 </div>
@@ -125,9 +114,35 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-</body>
+    <footer class="mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5>Museo Tumbas Reales</h5>
+                    <p>Preservando la riqueza histórica.</p>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5>Enlaces</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/">Inicio</a></li>
+                        <li><a href="/salas">Salas</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <h5>Contacto</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-geo-alt-fill me-2"></i> Lambayeque, Perú</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <div class="container">
+                © 2025 Museo Tumbas Reales de Sipán.
+            </div>
+        </div>
+    </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

@@ -5,151 +5,173 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${evento.id == null} ? 'Registrar Nuevo Evento' : 'Editar Evento'"></title>
-    <link rel="icon" type="image/png" th:href="@{/images/icono.png}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400&display=swap"
-        rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
     <link rel="stylesheet" th:href="@{/css/formularioEvento.css}">
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-museo-brown">
-        <div class="container-fluid">
-            <a class="navbar-brand" th:href="@{/}">Museo Tumbas Reales de Sipan</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+                <i class="bi bi-bank2 me-2"></i> Museo Tumbas Reales
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/}">Inicio</a>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" sec:authorize="isAuthenticated()">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/}">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">Administración</a>
+                        <ul class="dropdown-menu shadow">
+                            <li><a class="dropdown-item" th:href="@{/eventos}">Eventos</a></li>
+                            <li><a class="dropdown-item" th:href="@{/salas}">Salas</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/inventario/lista}">Inventario</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" th:href="@{/eventos}">Gestión </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/salas}">Salas</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/inventario/lista}">
-                            <i class="bi bi-box-seam"></i> Inventario
+                </ul>
+                <ul class="navbar-nav ms-auto align-items-center" sec:authorize="isAuthenticated()">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <div class="bg-white text-dark rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 32px; height: 32px;"><i class="bi bi-person-fill"></i></div>
+                            <span sec:authentication="name" class="fw-bold">Usuario</span>
                         </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <form th:action="@{/logout}" method="post" class="d-inline">
-                            <button type="submit" class="nav-link btn btn-link" style="color: rgba(255,255,255,.55);">
-                                Cerrar Sesión
-                            </button>
-                        </form>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><form th:action="@{/logout}" method="post" class="px-2"><button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión</button></form></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-5">
-        <h2 class="color-museo mb-4 text-center"
-            th:text="${evento.id == null} ? 'Registrar Nuevo Evento' : 'Editar Evento: ' + ${evento.nombre}">
-        </h2>
-
+    <div class="container mt-5 mb-5">
         <div class="row justify-content-center">
-            <div class="col-lg-7 col-md-9">
+            <div class="col-lg-8 col-md-10">
+                
+                <h2 class="color-museo mb-4 text-center fw-bold"
+                    th:text="${evento.id == null} ? 'Registrar Nuevo Evento' : 'Editar Evento'">
+                </h2>
 
-                <div class="card p-4 shadow-lg border-0">
+                <div class="card p-4 shadow-lg border-0 rounded-4">
+                    
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong th:text="${error}">Error</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
                     <form th:action="@{/eventos/guardar}" th:object="${evento}" method="post">
-
                         <input type="hidden" th:field="*{id}" />
 
+                        <h5 class="color-museo border-bottom pb-2 mb-3"><i class="bi bi-info-circle me-2"></i>Información General</h5>
+                        
                         <div class="mb-3">
-                            <label for="nombre" class="form-label">Nombre del Evento</label>
-                            <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="descripcion" class="form-label">Descripción</label>
-                            <textarea class="form-control" id="descripcion" th:field="*{descripcion}" rows="3"
-                                required></textarea>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="fechaInicio" class="form-label">Fecha de Inicio</label>
-                                <input type="date" class="form-control" id="fechaInicio" th:field="*{fechaInicio}"
-                                    required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="fechaFin" class="form-label">Fecha de Fin</label>
-                                <input type="date" class="form-control" id="fechaFin" th:field="*{fechaFin}" required>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="horaInicio" class="form-label">Hora de Inicio</label>
-                                <input type="time" class="form-control" id="horaInicio" th:field="*{horaInicio}"
-                                    required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="horaFin" class="form-label">Hora de Fin</label>
-                                <input type="time" class="form-control" id="horaFin" th:field="*{horaFin}" required>
-                            </div>
+                            <label for="nombre" class="form-label fw-bold">Nombre del Evento</label>
+                            <input type="text" class="form-control" id="nombre" th:field="*{nombre}" placeholder="Ej. Exposición de Oro" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="tipoEvento" class="form-label">Tipo de Evento</label>
-                            <input type="text" class="form-control" id="tipoEvento" th:field="*{tipoEvento}" required>
+                            <label for="descripcion" class="form-label fw-bold">Descripción</label>
+                            <textarea class="form-control" id="descripcion" th:field="*{descripcion}" rows="3" placeholder="Detalles del evento..." required></textarea>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="costoEntrada" class="form-label">Costo de Entrada (S/)</label>
-                            <div class="input-group">
-                                <span class="input-group-text">S/</span>
-                                <input type="number" class="form-control" id="costoEntrada" th:field="*{costoEntrada}"
-                                    step="0.01" required>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Fecha Inicio</label>
+                                <input type="date" class="form-control" th:field="*{fechaInicio}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Fecha Fin</label>
+                                <input type="date" class="form-control" th:field="*{fechaFin}" required>
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label for="sala" class="form-label">Sala Asignada</label>
-                            <select class="form-select" id="sala" th:field="*{sala}">
-                                <option value="">-- Seleccione una Sala --</option>
-                                <option th:each="sala : ${salas}" th:value="${sala.id}" th:text="${sala.nombre}">
-                                </option>
-                            </select>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Hora Inicio</label>
+                                <input type="time" class="form-control" th:field="*{horaInicio}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Hora Fin</label>
+                                <input type="time" class="form-control" th:field="*{horaFin}" required>
+                            </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Productos de inventario para usar:</label>
-                            <div class="row">
-                                <div class="col-md-6" th:each="producto : ${productosDisponibles}">
-                                    <div class="form-check mb-2 shadow-sm p-2 border rounded">
-                                        <input class="form-check-input" type="checkbox" name="productoIds"
-                                            th:id="${'producto'+producto.id}" th:value="${producto.id}">
-                                        <label class="form-check-label" th:for="${'producto'+producto.id}">
-                                            <span th:text="${producto.nombre}"></span>
-                                            <span class="text-muted">|</span>
-                                            <span th:text="${producto.tipo}"></span>
-                                            <span class="badge bg-secondary ms-2" th:text="${producto.estado}"></span>
-                                        </label>
-                                    </div>
+                        <h5 class="color-museo border-bottom pb-2 mb-3 mt-4"><i class="bi bi-building me-2"></i>Logística y Costos</h5>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Tipo de Evento</label>
+                                <input type="text" class="form-control" th:field="*{tipoEvento}" placeholder="Ej. Cultural, Taller" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Costo Entrada (S/)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">S/</span>
+                                    <input type="number" class="form-control" th:field="*{costoEntrada}" step="0.01" min="0" required>
                                 </div>
                             </div>
                         </div>
 
+                        <div class="mb-4">
+                            <label for="sala" class="form-label fw-bold">Sala Asignada</label>
+                            <select class="form-select" id="sala" th:field="*{sala}" required>
+                                <option value="">-- Seleccione una Sala --</option>
+                                <option th:each="sala : ${salas}" th:value="${sala.id}" th:text="${sala.nombre}"></option>
+                            </select>
+                        </div>
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-center pt-3">
+                        <h5 class="color-museo border-bottom pb-2 mb-3 mt-4"><i class="bi bi-box-seam me-2"></i>Reserva de Equipos</h5>
+                        
+                        <div class="bg-light p-3 rounded border">
+                            <div class="alert alert-info py-2 small mb-3">
+                                <i class="bi bi-info-circle-fill me-1"></i> Ingrese la cantidad requerida. El sistema validará la disponibilidad.
+                            </div>
+                            
+                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                <table class="table table-hover align-middle mb-0 bg-white">
+                                    <thead class="table-secondary sticky-top">
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th class="text-center">Disponible</th>
+                                            <th style="width: 120px;">Cantidad</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="producto : ${productosDisponibles}">
+                                            <td>
+                                                <strong th:text="${producto.nombre}" class="text-dark">Nombre</strong><br>
+                                                <small class="text-muted" th:text="${producto.tipo}">Tipo</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success" th:text="${producto.stockDisponible}">10</span>
+                                            </td>
+                                            <td>
+                                                <input type="hidden" name="productoIds" th:value="${producto.id}">
+                                                <input type="number" class="form-control form-control-sm text-center" 
+                                                       name="cantidades" min="0" th:max="${producto.stockDisponible}" 
+                                                       value="0" placeholder="0">
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div th:if="${productosDisponibles.isEmpty()}" class="text-center py-3 text-muted fst-italic">
+                                No hay inventario disponible.
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center pt-4 mt-2">
                             <button type="submit" class="btn btn-brown btn-lg px-5 shadow-sm">
-                                <span th:text="${evento.id == null} ? 'Registrar Evento' : 'Guardar Cambios'"></span>
+                                <i class="bi bi-check-lg me-2"></i><span th:text="${evento.id == null} ? 'Registrar Evento' : 'Guardar Cambios'"></span>
                             </button>
-                            <a th:href="@{/eventos}" class="btn btn-secondary btn-lg px-5">Cancelar</a>
+                            <a th:href="@{/eventos}" class="btn btn-outline-secondary btn-lg px-5">Cancelar</a>
                         </div>
                     </form>
                 </div>
@@ -157,9 +179,35 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-</body>
+    <footer class="mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5>Museo Tumbas Reales</h5>
+                    <p>Preservando la riqueza histórica de la cultura Mochica.</p>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5>Enlaces</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/">Inicio</a></li>
+                        <li><a href="/eventos">Cartelera</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <h5>Contacto</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-geo-alt-fill me-2"></i> Lambayeque, Perú</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <div class="container">
+                © 2025 Museo Tumbas Reales de Sipán.
+            </div>
+        </div>
+    </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
