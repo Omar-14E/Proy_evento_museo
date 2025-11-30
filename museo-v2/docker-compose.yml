@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # 1. Servicio de Base de Datos
+  museo-db:
+    image: mysql:8.0
+    container_name: museo_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: museo_eventos
+      MYSQL_ROOT_PASSWORD: "123456"  # Debe coincidir con tu configuración
+    ports:
+      - "3307:3306" # Mapeamos el puerto 3307 de tu PC al 3306 del contenedor (para evitar conflictos)
+    volumes:
+      - mysql_data:/var/lib/mysql # Guarda los datos en un volumen persistente
+
+  # 2. Servicio de tu Aplicación Java
+  museo-app:
+    build: . # Construye usando el Dockerfile de la carpeta actual
+    container_name: museo_app
+    restart: on-failure
+    ports:
+      - "8080:8080" # Tu app estará en localhost:8080
+    depends_on:
+      - museo-db # Espera a que la base de datos inicie
+    environment:
+      # Sobrescribimos la conexión a la BD para usar el nombre del contenedor 'museo-db'
+      SPRING_DATASOURCE_URL: jdbc:mysql://museo-db:3306/museo_eventos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "123456"
+      
+      # Sobrescribimos la ruta de las imágenes para usar la carpeta interna del contenedor
+      APP_UPLOAD_DIR: /app/uploads/
+    volumes:
+      # CONEXIÓN CLAVE: Conecta la carpeta 'uploads_data' de tu PC con '/app/uploads' del contenedor
+      # Así las imágenes que subas se guardan en tu computadora y no se pierden
+      - ./uploads_data:/app/uploads
+
+volumes:
+  mysql_data: # Define el volumen para la base de datos

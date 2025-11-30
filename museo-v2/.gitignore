@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+uploads_data/
+
+# Ignorar ejecutables
+*.exe
+ngrok.exe
+
+# Ignorar subidas locales antiguas (ya que usamos Docker volumes)
+src/main/resources/static/uploads/
